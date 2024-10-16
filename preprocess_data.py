@@ -1,5 +1,5 @@
 import numpy as np
-import math
+
 
 class DataPreprocess: 
     test: np.array = np.array([]) 
@@ -14,4 +14,10 @@ class DataPreprocess:
             lines = file.readlines()[1:]
         self.label_train = np.array([int(label.split(",")[-1].strip()) for label in lines])
 
-            
+
+if __name__ == "__main__":
+    dataPrepocess = DataPreprocess()
+    print('train', dataPrepocess.train.shape)
+    print('test', dataPrepocess.test.shape)
+    print('vocab_map', dataPrepocess.vocab_map.shape)
+    print('label_train', dataPrepocess.label_train.shape)
