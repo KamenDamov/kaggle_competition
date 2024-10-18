@@ -32,9 +32,9 @@ def length_of_docs(dataset_1, dataset_0, dataset):
   plt.grid(False)
   plt.legend(["Label 0", "Label 1", "Tous docs"])
   plt.show()
-  print_stats("label 1", data_1)
-  print_stats("label 0", data_0)
-  print_stats("global", data)
+  # print_stats("label 1", data_1)
+  # print_stats("label 0", data_0)
+  # print_stats("global", data)
 
 # Longueur par mots
 def length_of_words(dataset_1, dataset_0, dataset):
@@ -52,9 +52,9 @@ def length_of_words(dataset_1, dataset_0, dataset):
     plt.grid(False)
     plt.legend(["Toutes phrases", "Phrases similaires", "Phrases non similaires"])
     plt.show()
-    print_stats("similaires", data_1)
-    print_stats("non similaires", data_0)
-    print_stats("global", data)
+    # print_stats("similaires", data_1)
+    # print_stats("non similaires", data_0)
+    # print_stats("global", data)
 
 # Longueur moyenne des mots par phrase
 def mean_length_of_words(dataset_similaire, dataset_assimilaire, dataset):
@@ -71,12 +71,12 @@ def mean_length_of_words(dataset_similaire, dataset_assimilaire, dataset):
     plt.grid(False)
     plt.legend(["Toutes phrases", "Phrases similaires", "Phrases non similaires"])
     plt.show()
-    print_stats("similaires", data_sim)
-    print_stats("non similaires", data_assim)
-    print_stats("global", data)
+    # print_stats("similaires", data_sim)
+    # print_stats("non similaires", data_assim)
+    # print_stats("global", data)
 
 # Top 10 mots les plus fréquents
-def most_frequent_words(dataset, vocab_map):
+def most_frequent_words(dataset, vocab_map, name):
     # TODO: mots les plus frequents par doc
     data = dataset.sum(axis=0)
     top_idx = np.argsort(data)[-10:][::-1]
@@ -85,7 +85,7 @@ def most_frequent_words(dataset, vocab_map):
         x.append(vocab_map[idx])
         y.append(data[idx])
     sns.barplot(x=y,y=x)
-    plt.title("Top 10 mots les plus fréquents")
+    plt.title(name + ": Top 10 mots les plus fréquents")
     plt.xlabel("Fréquence")
     plt.ylabel("Mot")
     plt.show()
@@ -109,35 +109,55 @@ def distribution_of_words(dataset_1, dataset_0, dataset):
     plt.grid(False)
     plt.legend(["Label 0", "Label 1", "Tous docs"])
     plt.show()
-    print_stats("label 1", data_1)
-    print_stats("label 0", data_0)
-    print_stats("global", data)
+    # print_stats("label 1", data_1)
+    # print_stats("label 0", data_0)
+    # print_stats("global", data)
 
+
+def get_graphs(vocab_map, dataset, labels):
+    # Créer un dataset pour les labels 1 et les labels 0
+    dataset_1, dataset_0 = [], []
+    n = len(dataset) // 2
+    if labels is None:
+        dataset_1 = dataset
+    else:
+        for i in range(n):
+            if int(labels[i]) == 1:
+                dataset_1.append(dataset[i])
+                dataset_1.append(dataset[i + n])
+            else:
+                dataset_0.append(dataset[i])
+                dataset_0.append(dataset[i + n])
+    dataset_1, dataset_0 = np.array(dataset_1), np.array(dataset_0)
+
+    length_of_docs(dataset_1, dataset_0, dataset)
+    # length_of_words(dataset_1, dataset_0, dataset)
+    # mean_length_of_words(dataset_1, dataset_0, dataset)
+    most_frequent_words(dataset, vocab_map, 'all labels')
+    most_frequent_words(dataset_1, vocab_map, 'label 1')
+    most_frequent_words(dataset_0, vocab_map, 'label 0')
+    distribution_of_words(dataset_1, dataset_0, dataset)
 
 def main():
+    print("processing data...")
     data_preprocess = DataPreprocess()
     vocab_map = data_preprocess.vocab_map
-    for dataset, labels in [(data_preprocess.train, data_preprocess.label_train), (data_preprocess.test, None)]:
-        # Créer un dataset pour les labels 1 et les labels 0
-        dataset_1, dataset_0 = [], []
-        n = len(dataset) // 2
-        if labels is None:
-            dataset_1 = dataset
-        else:
-            for i in range(n):
-                if int(labels[i]) == 1:
-                    dataset_1.append(dataset[i])
-                    dataset_1.append(dataset[i + n])
-                else:
-                    dataset_0.append(dataset[i])
-                    dataset_0.append(dataset[i + n])
-        dataset_1, dataset_0 = np.array(dataset_1), np.array(dataset_0)
+    print("data processed!")
+    get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
+    print("graphs generated!")
+    print("removing stopwords...")
+    data_preprocess.remove_stopwords()
+    print("stopwords removed!")
+    print("generating graphs...")
+    get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
+    print("graphs generated!")
+    print("applying tf-idf...")
+    data_preprocess.initialize_tfidf()
+    print("tf-idf applied!")
+    print("generating graphs...")
+    get_graphs(vocab_map, data_preprocess.train_tfidf, data_preprocess.label_train)
+    print("graphs generated!")
 
-        length_of_docs(dataset_1, dataset_0, dataset)
-        # length_of_words(dataset_1, dataset_0, dataset)
-        # mean_length_of_words(dataset_1, dataset_0, dataset)
-        most_frequent_words(dataset, vocab_map)
-        distribution_of_words(dataset_1, dataset_0, dataset)
 
 if __name__ == "__main__":
     main()

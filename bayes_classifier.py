@@ -1,6 +1,7 @@
 import numpy as np
 from preprocess_data import DataPreprocess
 import csv
+import tqdm
 
 class BayesClassifier: 
     def __init__(self) -> None:
@@ -59,7 +60,7 @@ class BayesClassifier:
         laplace_smoothers = np.arange(0.4, 1.05, 0.05)
         max_f1 = 0
         best_lps = 0
-        for lps in laplace_smoothers:
+        for lps in tqdm(laplace_smoothers):
             f1_scores = []
             for k in range(7): 
                 X_train, y_train, X_val, y_val = self.random_split(X, y)
@@ -76,6 +77,11 @@ class BayesClassifier:
 
 if __name__ == "__main__": 
     data_preprocess = DataPreprocess()
+    print("data processed")
+    data_preprocess.remove_stopwords()
+    print("stopwords removed")
+    # data_preprocess.initialize_tfidf()
+    # print("tf-idf processed")
     bayes_classifier = BayesClassifier()
     best_lps, best_f1 = bayes_classifier.hyperparameter_tuning(data_preprocess.train, data_preprocess.label_train)
     print(best_lps, best_f1)
@@ -84,7 +90,7 @@ if __name__ == "__main__":
     tuned_bayes_classifier.fit(data_preprocess.train, data_preprocess.label_train)
     predictions = np.array([tuned_bayes_classifier.predict(x_i) for x_i in data_preprocess.test])
 
-    with open('output_labels_bayes_classifier_part_3.csv', mode='w', newline='') as file:
+    with open('output_labels_bayes_classifier_part_2.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
 
         writer.writerow(["ID", "label"])
