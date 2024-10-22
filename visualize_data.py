@@ -143,20 +143,32 @@ def main():
     data_preprocess = DataPreprocess()
     vocab_map = data_preprocess.vocab_map
     print("data processed!")
-    get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
+    #get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
     print("graphs generated!")
     print("removing stopwords...")
     data_preprocess.remove_stopwords()
     print("stopwords removed!")
     print("generating graphs...")
-    get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
+    #get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
     print("graphs generated!")
     print("applying tf-idf...")
     data_preprocess.initialize_tfidf()
     print("tf-idf applied!")
     print("generating graphs...")
-    get_graphs(vocab_map, data_preprocess.train_tfidf, data_preprocess.label_train)
+    #get_graphs(vocab_map, data_preprocess.train_tfidf, data_preprocess.label_train)
     print("graphs generated!")
+    correlation(data_preprocess.train)
+    
+def correlation(x: np.array): 
+    correlation_matrix = np.corrcoef(x, rowvar=False)
+
+    subset_size = 100  # Choose a smaller subset of features for visualization
+    correlation_subset = correlation_matrix[:subset_size, :subset_size]
+
+    plt.figure(figsize=(12, 8))  # Adjust size based on subset size
+    sns.heatmap(correlation_subset, cmap="coolwarm", annot=False)
+    plt.title(f"Correlation Heatmap for {subset_size} Features")
+    plt.show()
 
 
 if __name__ == "__main__":

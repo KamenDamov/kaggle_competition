@@ -1,5 +1,6 @@
 import numpy as np
-
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 def compute_tf(matrix):
     tf_matrix = np.zeros(matrix.shape)
@@ -21,6 +22,11 @@ def compute_idf(matrix):
 def compute_tfidf(tf_matrix, idf_vector):
     return tf_matrix * idf_vector
 
+def apply_pca(x: np.array, variance_ratio: float = 0.95) -> np.array:
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(x)
+    pca_model = PCA(n_components=variance_ratio)  # Use the variance_ratio to determine number of components
+    return pca_model.fit_transform(X_scaled)
 
 class DataPreprocess:
     test: np.array = np.array([]) 
@@ -36,6 +42,14 @@ class DataPreprocess:
         with open('./classer-le-text/label_train.csv', 'r') as file:
             lines = file.readlines()[1:]
         self.label_train = np.array([int(label.split(",")[-1].strip()) for label in lines])
+        
+        # Check types and shapes after loading
+        print(f"Type of self.train: {type(self.train)}, dtype: {self.train.dtype}, shape: {self.train.shape}")
+        print(f"Type of self.test: {type(self.test)}, dtype: {self.test.dtype}, shape: {self.test.shape}")
+        
+        # Ensure the arrays are of type float64
+        self.train = np.array(self.train, dtype=np.float64)
+        self.test = np.array(self.test, dtype=np.float64)
 
     def initialize_tfidf(self):
         self.train_tfidf = compute_tfidf(compute_tf(self.train), compute_idf(self.train))
@@ -54,6 +68,11 @@ class DataPreprocess:
         self.train = np.delete(self.train, idx_stopwords, axis=1)
         self.test = np.delete(self.test, idx_stopwords, axis=1)
 
+    def pca_train(self):
+        self.train = apply_pca(self.train)
+
+    def pca_test(self):
+        self.test = apply_pca(self.test)
 
 
 if __name__ == "__main__":
