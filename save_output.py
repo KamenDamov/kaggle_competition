@@ -1,25 +1,26 @@
 import csv
 import os
-from datetime import date
+from datetime import datetime
 import numpy as np
 
 
 def verify_predictions(predictions):
     for file in os.listdir('submissions'):
         if file.endswith('.csv'):
-            with open(os.path.join('output', file), 'r') as f:
+            with open(os.path.join('submissions', file), 'r') as f:
                 lines = f.readlines()[1:]
             label_file = np.array([int(label.split(",")[-1].strip()) for label in lines])
-            if label_file == predictions:
+            if np.all(label_file == predictions):
                 return file
     return False
 
 def save_output(predictions, classifier, params, transformations):
-    today = date.today().strftime('%Y%m%d')
+    today = datetime.now().strftime('%Y%m%d')
+    now = datetime.now().strftime('%H%M%S')
     if not os.path.exists('output/' + today):
         os.makedirs('output/' + today)
 
-    path = f'output/{today}/{classifier}_{params}_{transformations}.csv'
+    path = f'output/{today}/{now}_{classifier}_{params}_{transformations}.csv'
     with open(path, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["ID", "label"])
