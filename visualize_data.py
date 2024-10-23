@@ -92,9 +92,9 @@ def most_frequent_words(dataset, vocab_map, name):
 
 
 def distribution_of_words(dataset_1, dataset_0, dataset):
-    data_1 = np.sort(dataset_1.sum(axis=0) / dataset_1.sum())
-    data_0 = np.sort(dataset_0.sum(axis=0) / dataset_0.sum())
-    data = np.sort(dataset.sum(axis=0) / dataset.sum())
+    data_1 = np.sort(dataset_1.sum(axis=0))
+    data_0 = np.sort(dataset_0.sum(axis=0))
+    data = np.sort(dataset.sum(axis=0))
     idx = range(len(data))
     plt.plot(data_1)
     plt.plot(data_0)
@@ -114,6 +114,53 @@ def distribution_of_words(dataset_1, dataset_0, dataset):
     # print_stats("global", data)
 
 
+def visualize_2d_svd(dataset_1, dataset_0):
+    # Unzip points into x and y coordinates for each label group
+    x_0, y_0 = zip(*dataset_0)
+    x_1, y_1 = zip(*dataset_1)
+
+    # Create scatter plot
+    plt.scatter(x_0, y_0, color='blue', label='Label 0')
+    plt.scatter(x_1, y_1, color='red', label='Label 1')
+
+    # Add labels and title
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.title('2D Points Scatter Plot with Labels')
+
+    # Show legend
+    plt.legend()
+
+    # Display plot
+    plt.show()
+
+def visualize_3d_svd(dataset_1, dataset_0):
+    # Unzip points into x, y, and z coordinates for each label group
+    x_0, y_0, z_0 = zip(*dataset_0)
+    x_1, y_1, z_1 = zip(*dataset_1)
+
+    # Create a 3D plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot points with label 0
+    ax.scatter(x_0, y_0, z_0, color='blue', label='Label 0')
+
+    # Plot points with label 1
+    ax.scatter(x_1, y_1, z_1, color='red', label='Label 1')
+
+    # Add labels and title
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title('3D Points Scatter Plot with Labels')
+
+    # Show legend
+    ax.legend()
+
+    # Display plot
+    plt.show()
+
 def get_graphs(vocab_map, dataset, labels):
     # Créer un dataset pour les labels 1 et les labels 0
     dataset_1, dataset_0 = [], []
@@ -130,33 +177,66 @@ def get_graphs(vocab_map, dataset, labels):
                 dataset_0.append(dataset[i + n])
     dataset_1, dataset_0 = np.array(dataset_1), np.array(dataset_0)
 
-    length_of_docs(dataset_1, dataset_0, dataset)
-    # length_of_words(dataset_1, dataset_0, dataset)
-    # mean_length_of_words(dataset_1, dataset_0, dataset)
-    most_frequent_words(dataset, vocab_map, 'all labels')
-    most_frequent_words(dataset_1, vocab_map, 'label 1')
-    most_frequent_words(dataset_0, vocab_map, 'label 0')
-    distribution_of_words(dataset_1, dataset_0, dataset)
+
+# def main():
+#     data_preprocess = DataPreprocess()
+#     vocab_map = data_preprocess.vocab_map
+#     for dataset, labels in [(data_preprocess.train, data_preprocess.label_train), (data_preprocess.train_tfidf, data_preprocess.label_train)]:
+#         # Créer un dataset pour les labels 1 et les labels 0
+#         dataset_1, dataset_0 = [], []
+#         n = len(dataset) // 2
+#         if labels is None:
+#             dataset_1 = dataset
+#         else:
+#             for i in range(n):
+#                 if int(labels[i]) == 1:
+#                     dataset_1.append(dataset[i])
+#                     dataset_1.append(dataset[i + n])
+#                 else:
+#                     dataset_0.append(dataset[i])
+#                     dataset_0.append(dataset[i + n])
+#         dataset_1, dataset_0 = np.array(dataset_1), np.array(dataset_0)
+#
+#     length_of_docs(dataset_1, dataset_0, dataset)
+#     # length_of_words(dataset_1, dataset_0, dataset)
+#     # mean_length_of_words(dataset_1, dataset_0, dataset)
+#     most_frequent_words(dataset, vocab_map, 'all labels')
+#     most_frequent_words(dataset_1, vocab_map, 'label 1')
+#     most_frequent_words(dataset_0, vocab_map, 'label 0')
+#     distribution_of_words(dataset_1, dataset_0, dataset)
 
 def main():
     print("processing data...")
     data_preprocess = DataPreprocess()
     vocab_map = data_preprocess.vocab_map
     print("data processed!")
-    get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
-    print("graphs generated!")
-    print("removing stopwords...")
-    data_preprocess.remove_stopwords()
-    print("stopwords removed!")
-    print("generating graphs...")
-    get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
-    print("graphs generated!")
+
     print("applying tf-idf...")
     data_preprocess.initialize_tfidf()
     print("tf-idf applied!")
-    print("generating graphs...")
-    get_graphs(vocab_map, data_preprocess.train_tfidf, data_preprocess.label_train)
-    print("graphs generated!")
+
+    data_preprocess.apply_truncated_svd(2)
+    visualize_2d_svd(data_preprocess.train, data_preprocess.test)
+    print("2d visualization completed!")
+
+    print("processing data...")
+    data_preprocess = DataPreprocess()
+    vocab_map = data_preprocess.vocab_map
+    print("data processed!")
+    data_preprocess.apply_truncated_svd(3)
+    visualize_3d_svd(data_preprocess.train, data_preprocess.test)
+    print("3d visualization completed!")
+    # get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
+    # print("graphs generated!")
+    # print("removing stopwords...")
+    # data_preprocess.remove_stopwords()
+    # print("stopwords removed!")
+    # print("generating graphs...")
+    # get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
+    # print("graphs generated!")
+    # print("generating graphs...")
+    # get_graphs(vocab_map, data_preprocess.train_tfidf, data_preprocess.label_train)
+    # print("graphs generated!")
 
 
 if __name__ == "__main__":
