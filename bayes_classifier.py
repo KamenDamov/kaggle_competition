@@ -1,10 +1,12 @@
 import numpy as np
-# import cupy as np
 from preprocess_data import DataPreprocess
 import csv
-from tqdm import tqdm
+import tqdm
 
-class BayesClassifier: 
+from save_output import save_output
+
+
+class BayesClassifier:
     def __init__(self) -> None:
         self.priors = None
         self.likelihoods = None
@@ -58,7 +60,7 @@ class BayesClassifier:
         return 2 * (precision * recall) / (precision + recall)
     
     def hyperparameter_tuning(self, X, y):
-        laplace_smoothers = np.arange(0.05, 1.05, 0.05)
+        laplace_smoothers = np.arange(0.4, 1.05, 0.05)
         max_f1 = 0
         best_lps = 0
         for lps in tqdm(laplace_smoothers):
@@ -79,31 +81,16 @@ class BayesClassifier:
 if __name__ == "__main__": 
     data_preprocess = DataPreprocess()
     print("data processed")
-    # data_preprocess.remove_stopwords()
-    # print("stopwords removed")
+    data_preprocess.remove_stopwords()
+    print("stopwords removed")
     # data_preprocess.initialize_tfidf()
     # print("tf-idf processed")
-    # data_preprocess.remove_min_max(5, 0.999)
-    # print("min-max removed")
-    data_preprocess.apply_truncated_svd(2000)
-    print("data truncated")
-
-    train = data_preprocess.train
-    test = data_preprocess.test
-    label_train = data_preprocess.label_train
-
     bayes_classifier = BayesClassifier()
-    best_lps, best_f1 = bayes_classifier.hyperparameter_tuning(train, label_train)
+    best_lps, best_f1 = bayes_classifier.hyperparameter_tuning(data_preprocess.train, data_preprocess.label_train)
     print(best_lps, best_f1)
 
     tuned_bayes_classifier = BayesClassifier()
-    tuned_bayes_classifier.fit(train, label_train, laplace_smoothing=best_lps)
-    predictions = np.array([tuned_bayes_classifier.predict(x_i) for x_i in test])
+    tuned_bayes_classifier.fit(data_preprocess.train, data_preprocess.label_train)
+    predictions = np.array([tuned_bayes_classifier.predict(x_i) for x_i in data_preprocess.test])
 
-    with open('output_labels_bayes_classifier_part_7.csv', mode='w', newline='') as file:
-        writer = csv.writer(file)
-
-        writer.writerow(["ID", "label"])
-
-        for i, label in enumerate(predictions):
-            writer.writerow([i, label])
+    save_output(predictions, "bayes", best_lps, "stopwords")
