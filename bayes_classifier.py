@@ -3,7 +3,10 @@ from preprocess_data import DataPreprocess
 import csv
 import tqdm
 
-class BayesClassifier: 
+from save_output import save_output
+
+
+class BayesClassifier:
     def __init__(self) -> None:
         self.priors = None
         self.likelihoods = None
@@ -90,10 +93,4 @@ if __name__ == "__main__":
     tuned_bayes_classifier.fit(data_preprocess.train, data_preprocess.label_train)
     predictions = np.array([tuned_bayes_classifier.predict(x_i) for x_i in data_preprocess.test])
 
-    with open('output_labels_bayes_classifier_part_2.csv', mode='w', newline='') as file:
-        writer = csv.writer(file)
-
-        writer.writerow(["ID", "label"])
-
-        for i, label in enumerate(predictions):
-            writer.writerow([i, label])
+    save_output(predictions, "bayes", best_lps, "stopwords")

@@ -2,6 +2,7 @@ import csv
 import numpy as np
 
 from preprocess_data import DataPreprocess
+from save_output import save_output
 
 
 class SVM:
@@ -60,10 +61,5 @@ if __name__ == "__main__":
     tuned_bayes_classifier.fit(data_preprocess.train, data_preprocess.label_train)
     predictions = np.array([tuned_bayes_classifier.predict(x_i) for x_i in data_preprocess.test])
 
-    with open('output_labels_bayes_classifier_part_3.csv', mode='w', newline='') as file:
-        writer = csv.writer(file)
-
-        writer.writerow(["ID", "label"])
-
-        for i, label in enumerate(predictions):
-            writer.writerow([i, label])
+    params = f'C={tuned_bayes_classifier.C}gamma={tuned_bayes_classifier.gamma}'
+    save_output(predictions, "svm", params, "")
