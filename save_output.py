@@ -47,7 +47,11 @@ def save_output(predictions, classifier, params, transformations):
 
     print('Number of 0:', np.sum(predictions == 0))
     print('Number of 1:', np.sum(predictions == 1))
-    print('Number of differences with bayes classifier submission:', np.sum(predictions != pd.read_csv("output/output_labels_bayes_classifier.csv")['label']))
+    print('Ratio of 1:', np.sum(predictions == 1) / len(predictions))
+
+    bayes_submission = pd.read_csv("output/output_labels_bayes_classifier.csv")['label']
+    print('Number of differences with bayes classifier submission:', np.sum(predictions != bayes_submission))
+    print('Ratio of 1 in bayes submission:', np.sum(bayes_submission == 1) / len(bayes_submission))
 
 
 
