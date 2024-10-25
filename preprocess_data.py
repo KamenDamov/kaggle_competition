@@ -132,6 +132,3 @@ if __name__ == "__main__":
     # dataPrepocess.remove_min_max(5, 0.999)
     # print('train_tfidf', dataPrepocess.train_tfidf.shape)
     # print('test_tfidf', dataPrepocess.test_tfidf.shape)
-
-
-
