@@ -1,7 +1,7 @@
 # import numpy as nnp
 import numpy as np
 
-import truncated_svd
+# import truncated_svd
 from sklearn.decomposition import PCA, TruncatedSVD
 
 # import cupy as np
