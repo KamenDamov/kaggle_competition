@@ -35,8 +35,6 @@ class DataPreprocess:
     train: np.array = np.array([])
     vocab_map: np.array = np.array([])
     label_train: np.array = list
-    train_tfidf: np.array = np.array([])
-    test_tfidf: np.array = np.array([])
     def __init__(self) -> None:
         self.test = np.load('./classer-le-text/data_test.npy', allow_pickle=True).astype(np.float32)
         self.train = np.load('./classer-le-text/data_train.npy', allow_pickle=True).astype(np.float32)
@@ -46,41 +44,41 @@ class DataPreprocess:
         self.label_train = np.array([int(label.split(",")[-1].strip()) for label in lines])
 
     def initialize_tfidf(self):
-        self.train_tfidf = compute_tfidf(compute_tf(self.train), compute_idf(self.train))
-        self.test_tfidf = compute_tfidf(compute_tf(self.test), compute_idf(self.test))
+        self.train = compute_tfidf(compute_tf(self.train), compute_idf(self.train))
+        self.test= compute_tfidf(compute_tf(self.test), compute_idf(self.test))
 
     def remove_min_max(self, min, max):
         # min or max can be absolute value or % value
         if 0 < max < 1:
-            max_tfidf_scores = np.max(self.train_tfidf, axis=0)
+            max_tfidf_scores = np.max(self.train, axis=0)
             percentile_threshold = np.percentile(max_tfidf_scores, max*100)
             features_to_keep = max_tfidf_scores <= percentile_threshold
-            self.train_tfidf = self.train_tfidf[:,features_to_keep]
-            self.test_tfidf = self.test_tfidf[:,features_to_keep]
+            self.train = self.train[:,features_to_keep]
+            self.test = self.test[:,features_to_keep]
             # self.vocab_map = self.vocab_map[features_to_keep.get()]
             self.vocab_map = self.vocab_map[features_to_keep]
         elif max > 0:
-            max_tfidf_scores = np.max(self.train_tfidf, axis=0)
+            max_tfidf_scores = np.max(self.train, axis=0)
             idx_to_delete = np.argsort(max_tfidf_scores)[-max:]
             # self.vocab_map = nnp.delete(self.vocab_map, idx_to_delete, axis=0)
             self.vocab_map = nnp.delete(self.vocab_map, idx_to_delete.get(), axis=0)
-            self.train_tfidf = np.delete(self.train_tfidf, idx_to_delete, axis=1)
-            self.test_tfidf = np.delete(self.test_tfidf, idx_to_delete, axis=1)
+            self.train = np.delete(self.train, idx_to_delete, axis=1)
+            self.test = np.delete(self.test, idx_to_delete, axis=1)
         if 0 < min < 1:
-            min_tfidf_scores = np.min(self.train_tfidf, axis=0)
+            min_tfidf_scores = np.min(self.train, axis=0)
             percentile_threshold = np.percentile(min_tfidf_scores, min * 100)
             features_to_keep = min_tfidf_scores <= percentile_threshold
-            self.train_tfidf = self.train_tfidf[:, features_to_keep]
-            self.test_tfidf = self.test_tfidf[:, features_to_keep]
+            self.train = self.train[:, features_to_keep]
+            self.test = self.test[:, features_to_keep]
             # self.vocab_map = self.vocab_map[features_to_keep.get()]
             self.vocab_map = self.vocab_map[features_to_keep]
         elif min > 0:
-            min_tfidf_scores = np.min(self.train_tfidf, axis=0)
+            min_tfidf_scores = np.min(self.train, axis=0)
             idx_to_delete = np.argsort(min_tfidf_scores)[-min:]
             # self.vocab_map = nnp.delete(self.vocab_map, idx_to_delete.get(), axis=0)
             self.vocab_map = nnp.delete(self.vocab_map, idx_to_delete, axis=0)
-            self.train_tfidf = np.delete(self.train_tfidf, idx_to_delete, axis=1)
-            self.test_tfidf = np.delete(self.test_tfidf, idx_to_delete, axis=1)
+            self.train = np.delete(self.train, idx_to_delete, axis=1)
+            self.test = np.delete(self.test, idx_to_delete, axis=1)
 
     def remove_stopwords(self):
         # TODO: use list instead of opening document
@@ -101,8 +99,8 @@ class DataPreprocess:
 
     def apply_truncated_svd(self, n_components):
         truncated_svd = TruncatedSVD(n_components=n_components, algorithm='arpack')
-        self.train_tfidf = truncated_svd.fit_transform(self.train_tfidf)
-        self.test_tfidf = truncated_svd.fit_transform(self.test_tfidf)
+        self.train = truncated_svd.fit_transform(self.train)
+        self.test = truncated_svd.fit_transform(self.test)
 
 
 if __name__ == "__main__":
@@ -130,5 +128,5 @@ if __name__ == "__main__":
 
     # dataPrepocess.initialize_tfidf()
     # dataPrepocess.remove_min_max(5, 0.999)
-    # print('train_tfidf', dataPrepocess.train_tfidf.shape)
-    # print('test_tfidf', dataPrepocess.test_tfidf.shape)
+    # print('train', dataPrepocess.train.shape)
+    # print('test', dataPrepocess.test.shape)
