@@ -47,7 +47,7 @@ def save_output(predictions, classifier, params, transformations):
 
     print('Number of 0:', np.sum(predictions == 0))
     print('Number of 1:', np.sum(predictions == 1))
-    print('Number of differences with bases classifier submission:', np.sum(predictions != pd.read_csv("output/output_labels_bayes_classifier.csv")['label']))
+    print('Number of differences with bayes classifier submission:', np.sum(predictions != pd.read_csv("output/output_labels_bayes_classifier.csv")['label']))
 
 
 
