@@ -33,16 +33,19 @@ if __name__ == '__main__':
     train = data_preprocess.train
     label_train = data_preprocess.label_train
     test = data_preprocess.test
+    print('train:', train.shape)
+    print('test:', test.shape)
+    print('Ratio of 1 in train:', np.sum(label_train == 1) / len(label_train))
 
     # best_params_, best_score_ = grid_search(train, label_train)
     # print('best params: {}, score: {}'.format(best_params_, best_score_))
 
-    svc = RandomForestClassifier()
+    rfc = RandomForestClassifier(verbose=3)
     # svc = SVC(C=best_params_['C'], gamma=best_params_['gamma'])
-    svc.fit(train, label_train)
-    print('f1_score on train:', f1_score(label_train, svc.predict(train)))
+    rfc.fit(train, label_train)
+    print('f1_score on train:', f1_score(label_train, rfc.predict(train)))
 
-    y_pred = svc.predict(test)
+    y_pred = rfc.predict(test)
 
-    params = f'C={svc.C}gamma={svc.gamma}'
+    params = f'n_estimators={rfc.n_estimators}'
     save_output(y_pred, "random_forests", params, "")
