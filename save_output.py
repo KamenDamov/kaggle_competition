@@ -15,15 +15,17 @@ def verify_submissions(predictions):
                 return file
     return None
 
-def verify_output(predictions):
+def verify_output(predictions, newly_saved):
     all_files = []
-    for file in os.listdir('output'):
-        if file.endswith('.csv'):
-            with open(os.path.join('output', file), 'r') as f:
-                lines = f.readlines()[1:]
-            label_file = np.array([int(label.split(",")[-1].strip()) for label in lines])
-            if np.all(label_file == predictions):
-                all_files.append(file)
+    for root, dirs, files in os.walk('output'):
+        for file in files:
+            if file.endswith('.csv') and os.path.join(root, file) != newly_saved:
+                with open(os.path.join(root, file), 'r') as f:
+                    lines = f.readlines()[1:]
+                label_file = np.array([int(label.split(",")[-1].strip()) for label in lines])
+                if np.all(label_file == predictions):
+                    all_files.append(os.path.join(root, file))
+
     return all_files if len(all_files) > 0 else [None]
 
 def save_output(predictions, classifier, params, transformations):
@@ -42,7 +44,7 @@ def save_output(predictions, classifier, params, transformations):
 
     print("already same predictions saved in submissions?", verify_submissions(predictions))
     print("already same predictions saved in output?")
-    for file in verify_output(predictions):
+    for file in verify_output(predictions, path):
         print('\t', file)
 
     print('Number of 0:', np.sum(predictions == 0))
