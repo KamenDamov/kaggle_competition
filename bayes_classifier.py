@@ -1,9 +1,14 @@
 import numpy as np
+from sklearn.metrics import f1_score
+from sklearn.model_selection import StratifiedShuffleSplit, GridSearchCV
+from sklearn.naive_bayes import ComplementNB, MultinomialNB
+
 from preprocess_data import DataPreprocess
 import csv
 import tqdm
 
 from save_output import save_output
+from visualize_data import plot_grid_search
 
 
 class BayesClassifier:
@@ -76,21 +81,52 @@ class BayesClassifier:
                 best_lps = lps
                 max_f1 = f1_mean 
         return best_lps, max_f1
-            
+
+
+def grid_search(X, y):
+    alpha = np.arange(0.001, 0.1, 0.001)
+    param_grid = dict(alpha=alpha)
+    print(param_grid)
+    cv = StratifiedShuffleSplit(n_splits=5, test_size=0.3, random_state=42)
+    grid = GridSearchCV(ComplementNB(), param_grid=param_grid, cv=cv, scoring='f1', verbose=3)
+    grid.fit(X, y)
+    return grid.best_params_, grid.best_score_
+
 
 if __name__ == "__main__": 
     data_preprocess = DataPreprocess()
     print("data processed")
     data_preprocess.remove_stopwords()
     print("stopwords removed")
-    # data_preprocess.initialize_tfidf()
-    # print("tf-idf processed")
-    bayes_classifier = BayesClassifier()
-    best_lps, best_f1 = bayes_classifier.hyperparameter_tuning(data_preprocess.train, data_preprocess.label_train)
-    print(best_lps, best_f1)
+    data_preprocess.initialize_tfidf()
+    print("tf-idf processed")
+    # data_preprocess.apply_truncated_svd(100)
+    # print('truncated svd applied!')
+    data_preprocess.remove_min_max(10, 0.999)
 
-    tuned_bayes_classifier = BayesClassifier()
-    tuned_bayes_classifier.fit(data_preprocess.train, data_preprocess.label_train)
-    predictions = np.array([tuned_bayes_classifier.predict(x_i) for x_i in data_preprocess.test])
+    train = data_preprocess.train
+    label_train = data_preprocess.label_train
+    test = data_preprocess.test
+    print('train:', train.shape)
+    print('test:', test.shape)
+    print('Ratio of 1 in train:', np.sum(label_train == 1) / len(label_train))
 
-    save_output(predictions, "bayes", best_lps, "stopwords")
+    # bayes_classifier = BayesClassifier()
+    # best_lps, best_f1 = bayes_classifier.hyperparameter_tuning(data_preprocess.train, data_preprocess.label_train)
+    # print(best_lps, best_f1)
+    #
+    # tuned_bayes_classifier = BayesClassifier()
+    # tuned_bayes_classifier.fit(data_preprocess.train, data_preprocess.label_train)
+    # predictions = np.array([tuned_bayes_classifier.predict(x_i) for x_i in data_preprocess.test])
+
+    best_params_, best_score_ = grid_search(train, label_train)
+    print('best params: {}, score: {}'.format(best_params_, best_score_))
+
+    bayes_classifier = ComplementNB(alpha=best_params_['alpha'])
+    bayes_classifier.fit(train, label_train)
+    print('f1_score on train:', f1_score(label_train, bayes_classifier.predict(train)))
+
+    y_pred = bayes_classifier.predict(test)
+
+    params = f'alpha={bayes_classifier.alpha}'
+    save_output(y_pred, "comp_bayes", params, "stopwords_tf-idf_min-max")
