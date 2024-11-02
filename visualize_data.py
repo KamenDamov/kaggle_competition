@@ -79,7 +79,7 @@ def mean_length_of_words(dataset_similaire, dataset_assimilaire, dataset):
 def most_frequent_words(dataset, vocab_map, name):
     # TODO: mots les plus frequents par doc
     data = dataset.sum(axis=0)
-    top_idx = np.argsort(data)[-10:][::-1]
+    top_idx = np.argsort(data)[-20:][::-1]
     x, y= [], []
     for idx in top_idx:
         x.append(vocab_map[idx])

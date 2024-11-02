@@ -1,5 +1,7 @@
 import numpy as np
-
+from sklearn.tree import DecisionTreeClassifier
+from imblearn.over_sampling import SMOTE
+import re
 
 def compute_tf(matrix):
     tf_matrix = np.zeros(matrix.shape)
@@ -20,6 +22,28 @@ def compute_idf(matrix):
 
 def compute_tfidf(tf_matrix, idf_vector):
     return tf_matrix * idf_vector
+
+def tree_based_dimensionality_reduction(X_train, y_train, threshold=0.000001, max_features=None):
+    # Initialize the Decision Tree Classifier
+    tree = DecisionTreeClassifier(random_state=0)
+    tree.fit(X_train, y_train)
+    importances = tree.feature_importances_
+    important_indices = np.where(importances >= threshold)[0]
+    sorted_indices = important_indices[np.argsort(importances[important_indices])[::-1]]
+    if max_features:
+        sorted_indices = sorted_indices[:max_features]
+    X_train_reduced = X_train[:, sorted_indices] if isinstance(X_train, np.ndarray) else X_train.iloc[:, sorted_indices]
+    
+    return X_train_reduced, sorted_indices
+
+def smote_oversampling(X, y, new_samples=1500):
+    class_counts = np.bincount(y)
+    minority_class = np.argmin(class_counts)
+    target_count = class_counts[minority_class] + new_samples
+    smote = SMOTE(sampling_strategy={minority_class: target_count}, random_state=0)
+    X_resampled, y_resampled = smote.fit_resample(X, y)
+    
+    return X_resampled, y_resampled
 
 
 class DataPreprocess:
@@ -54,6 +78,18 @@ class DataPreprocess:
         self.train = np.delete(self.train, idx_stopwords, axis=1)
         self.test = np.delete(self.test, idx_stopwords, axis=1)
 
+    def remove_non_words(self):
+        with open('english_stopwords', 'r') as f:
+            stopwords = [line.strip() for line in f.readlines()]
+        idx_stopwords = [i for i in range(len(self.vocab_map)) if self.vocab_map[i] in stopwords]
+        self.vocab_map = np.delete(self.vocab_map, idx_stopwords, axis=0)
+        self.train = np.delete(self.train, idx_stopwords, axis=1)
+        self.test = np.delete(self.test, idx_stopwords, axis=1)
+        
+        filtered_indices = [index for index, token in enumerate(self.vocab_map) if not re.match(r'^[a-zA-Z]{2,}$', token)]
+        self.vocab_map = np.delete(self.vocab_map, filtered_indices, axis=0)
+        self.train = np.delete(self.train, filtered_indices, axis=1)
+        self.test = np.delete(self.test, filtered_indices, axis=1)
 
 
 if __name__ == "__main__":
