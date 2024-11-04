@@ -47,7 +47,7 @@ def tree_based_dimensionality_reduction(X_train, y_train, top_features=5000):
     
     return X_train_reduced, sorted_indices
 
-def smote_oversampling(X, y, new_samples=1500):
+def smote_oversampling(X, y, new_samples=1000):
     class_counts = np.bincount(y)
     minority_class = np.argmin(class_counts)
     target_count = class_counts[minority_class] + new_samples
@@ -69,29 +69,22 @@ def boostrap_oversampling(X, y, new_samples=1000):
     
     return X_resampled, y_resampled
 
-def random_undersampling(X, y, new_samples=1500):
-    # Find the majority class
+def random_undersampling(X, y, new_samples=3562):
     unique, counts = np.unique(y, return_counts=True)
     majority_class = unique[np.argmax(counts)]
-    
-    # Get indices for majority and minority classes
     majority_indices = np.where(y == majority_class)[0]
     minority_indices = np.where(y != majority_class)[0]
-    
-    # Downsample the majority class by randomly selecting required samples
     np.random.seed(42)  # For reproducibility
     majority_downsampled_indices = np.random.choice(
         majority_indices, size=(len(majority_indices) - new_samples), replace=False
     )
-    
-    # Combine downsampled majority indices with minority indices
     resampled_indices = np.concatenate([majority_downsampled_indices, minority_indices])
-    
-    # Shuffle the combined indices
     np.random.shuffle(resampled_indices)
-    
-    # Return the resampled X and y
+    #non_zero_columns = np.array((X[resampled_indices].sum(axis=0) != 0)).flatten()
+    #X_filtered = X[resampled_indices][:, non_zero_columns]
     return X[resampled_indices], y[resampled_indices]
+
+
 
 class DataPreprocess:
     test: np.array = np.array([]) 

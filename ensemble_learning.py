@@ -11,24 +11,26 @@ from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from scipy.stats import uniform
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import cross_val_predict
 
 # Cross-validation and scoring setup
-cv = StratifiedKFold(n_splits=7, shuffle=True, random_state=0)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scorer = make_scorer(f1_score)
 
 def create_pipeline_and_params(model_name):
     if model_name == 'ComplementNB':
         pipeline = Pipeline([
-            ('tfidf', TfidfTransformer()),
-            ('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
+            #('tfidf', TfidfTransformer()),
+            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
             ('model', ComplementNB())
         ])
-        param_grid = {'model__alpha': uniform(0.1, 1.7)}
+        param_grid = {'model__alpha': uniform(0.01, 0.7)}
     
     elif model_name == 'XGBoost':
         pipeline = Pipeline([
-            ('tfidf', TfidfTransformer()),
-            ('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
+            #('tfidf', TfidfTransformer()),
+            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
             ('model', XGBClassifier(use_label_encoder=False, eval_metric='logloss'))
         ])
         param_grid = {
@@ -40,17 +42,17 @@ def create_pipeline_and_params(model_name):
     
     elif model_name == 'LogisticRegression':
         pipeline = Pipeline([
-            ('tfidf', TfidfTransformer()),
-            ('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
+            #('tfidf', TfidfTransformer()),
+            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
             ('model', LogisticRegression(max_iter=1000))
         ])
         param_grid = {'model__C': uniform(0.1, 10), 'model__penalty': ['l1'], 'model__solver': ['liblinear']}
 
     elif model_name == 'SVC':
         pipeline = Pipeline([
-            ('tfidf', TfidfTransformer()),
-            ('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
-            ('model', SVC())
+            #('tfidf', TfidfTransformer()),
+            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
+            ('model', SVC(probability=True))
         ])
         param_grid = {
             'model__C': uniform(0.1, 10),
@@ -63,13 +65,25 @@ def create_pipeline_and_params(model_name):
     return pipeline, param_grid
 
 def tune_model(pipeline, param_grid, X_train, y_train):
-
     random_search = RandomizedSearchCV(
-        pipeline, param_distributions=param_grid, scoring=scorer, cv=cv, 
-        n_iter=15, n_jobs=-1, random_state=42, verbose=3
+        pipeline, param_distributions=param_grid, scoring=scorer, cv=cv,
+        n_iter=5, n_jobs=1, random_state=0, verbose=3
     )
     random_search.fit(X_train, y_train)
     print(f"Best F1 for {pipeline.named_steps['model'].__class__.__name__}:", random_search.best_score_)
+
+    # Get predictions across all folds to calculate confusion matrix for each fold
+    y_pred = cross_val_predict(random_search.best_estimator_, X_train, y_train, cv=cv, method='predict')
+
+    # Print confusion matrix for each fold
+    for fold, (train_idx, val_idx) in enumerate(cv.split(X_train, y_train)):
+        y_val_true = y_train[val_idx]
+        y_val_pred = y_pred[val_idx]
+
+        # Compute confusion matrix
+        cm = confusion_matrix(y_val_true, y_val_pred)
+        print(f'Confusion Matrix - Fold {fold + 1}:\n{cm}\n')
+    
     return random_search.best_estimator_
 
 def train_ensemble(X_train, y_train, model_names):
