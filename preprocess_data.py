@@ -23,15 +23,26 @@ def compute_idf(matrix):
 def compute_tfidf(tf_matrix, idf_vector):
     return tf_matrix * idf_vector
 
-def tree_based_dimensionality_reduction(X_train, y_train, threshold=0.000001, max_features=None):
+def tree_based_dimensionality_reduction(X_train, y_train, top_features=5000):
     # Initialize the Decision Tree Classifier
     tree = DecisionTreeClassifier(random_state=0)
+    
+    # Fit the tree on the data
     tree.fit(X_train, y_train)
+    
+    # Extract feature importances
     importances = tree.feature_importances_
-    important_indices = np.where(importances >= threshold)[0]
+    
+    # Identify all indices of features that have non-zero importance
+    important_indices = np.where(importances > 0)[0]
+    
+    # Sort features by importance (highest first)
     sorted_indices = important_indices[np.argsort(importances[important_indices])[::-1]]
-    if max_features:
-        sorted_indices = sorted_indices[:max_features]
+    
+    # Limit to top `top_features` if there are enough features
+    sorted_indices = sorted_indices[:top_features]
+    
+    # Select the important features for the training set
     X_train_reduced = X_train[:, sorted_indices] if isinstance(X_train, np.ndarray) else X_train.iloc[:, sorted_indices]
     
     return X_train_reduced, sorted_indices
@@ -45,6 +56,42 @@ def smote_oversampling(X, y, new_samples=1500):
     
     return X_resampled, y_resampled
 
+def boostrap_oversampling(X, y, new_samples=1000):
+    unique_classes, class_counts = np.unique(y, return_counts=True)
+    minority_class = unique_classes[np.argmin(class_counts)]
+    X_minority = X[y == minority_class]
+    y_minority = y[y == minority_class]
+    resample_indices = np.random.choice(len(X_minority), size=new_samples, replace=True)
+    X_oversampled = X_minority[resample_indices]
+    y_oversampled = y_minority[resample_indices]
+    X_resampled = np.vstack([X, X_oversampled])
+    y_resampled = np.hstack([y, y_oversampled])
+    
+    return X_resampled, y_resampled
+
+def random_undersampling(X, y, new_samples=1500):
+    # Find the majority class
+    unique, counts = np.unique(y, return_counts=True)
+    majority_class = unique[np.argmax(counts)]
+    
+    # Get indices for majority and minority classes
+    majority_indices = np.where(y == majority_class)[0]
+    minority_indices = np.where(y != majority_class)[0]
+    
+    # Downsample the majority class by randomly selecting required samples
+    np.random.seed(42)  # For reproducibility
+    majority_downsampled_indices = np.random.choice(
+        majority_indices, size=(len(majority_indices) - new_samples), replace=False
+    )
+    
+    # Combine downsampled majority indices with minority indices
+    resampled_indices = np.concatenate([majority_downsampled_indices, minority_indices])
+    
+    # Shuffle the combined indices
+    np.random.shuffle(resampled_indices)
+    
+    # Return the resampled X and y
+    return X[resampled_indices], y[resampled_indices]
 
 class DataPreprocess:
     test: np.array = np.array([]) 
@@ -60,6 +107,10 @@ class DataPreprocess:
         with open('./classer-le-text/label_train.csv', 'r') as file:
             lines = file.readlines()[1:]
         self.label_train = np.array([int(label.split(",")[-1].strip()) for label in lines])
+
+        self.train = np.array(self.train, dtype=np.int8)
+        self.test = np.array(self.test, dtype=np.int8)
+
 
     def initialize_tfidf(self):
         self.train_tfidf = compute_tfidf(compute_tf(self.train), compute_idf(self.train))
@@ -85,7 +136,7 @@ class DataPreprocess:
         self.vocab_map = np.delete(self.vocab_map, idx_stopwords, axis=0)
         self.train = np.delete(self.train, idx_stopwords, axis=1)
         self.test = np.delete(self.test, idx_stopwords, axis=1)
-        
+
         filtered_indices = [index for index, token in enumerate(self.vocab_map) if not re.match(r'^[a-zA-Z]{2,}$', token)]
         self.vocab_map = np.delete(self.vocab_map, filtered_indices, axis=0)
         self.train = np.delete(self.train, filtered_indices, axis=1)
