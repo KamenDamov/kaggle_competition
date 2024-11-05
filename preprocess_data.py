@@ -1,4 +1,5 @@
 import numpy as np
+from nltk import SnowballStemmer, WordNetLemmatizer
 from sklearn.tree import DecisionTreeClassifier
 from imblearn.over_sampling import SMOTE
 import re
@@ -82,6 +83,15 @@ def random_undersampling(X, y, new_samples=4000):
     np.random.shuffle(resampled_indices)
     return X[resampled_indices], y[resampled_indices]
 
+def combine_columns(X, unique_words, word_mapping):
+    new_X = np.zeros((X.shape[0], len(unique_words)))
+
+    # Fill the new matrix with summed occurrences
+    for stem, indices in word_mapping.items():
+        for idx in indices:
+            new_X[:, unique_words.index(stem)] += X[:, idx]
+
+    return new_X
 
 
 class DataPreprocess:
@@ -132,6 +142,44 @@ class DataPreprocess:
         self.vocab_map = np.delete(self.vocab_map, filtered_indices, axis=0)
         self.train = np.delete(self.train, filtered_indices, axis=1)
         self.test = np.delete(self.test, filtered_indices, axis=1)
+
+    def apply_stemming(self):
+        stemmer = SnowballStemmer("english")
+
+        # Create a mapping of stemmed words to their original indices
+        stemmed_word_mapping = {}
+        for idx, word in enumerate(self.vocab_map):
+            stemmed_word = stemmer.stem(word)
+            if stemmed_word not in stemmed_word_mapping:
+                stemmed_word_mapping[stemmed_word] = []
+            stemmed_word_mapping[stemmed_word].append(idx)
+
+        # Create a new combined matrix
+        # The number of unique stemmed words will determine the new matrix shape
+        unique_stems = list(stemmed_word_mapping.keys())
+
+        self.train = combine_columns(self.train, unique_stems, stemmed_word_mapping)
+        self.test = combine_columns(self.test, unique_stems, stemmed_word_mapping)
+        self.vocab_map = np.array(unique_stems)
+
+    def apply_lemmatization(self):
+        # Initialize the WordNet Lemmatizer
+        lemmatizer = WordNetLemmatizer()
+
+        # Create a mapping of lemmatized words to their original indices
+        lemmatized_word_mapping = {}
+        for idx, word in enumerate(self.vocab_map):
+            lemmatized_word = lemmatizer.lemmatize(word)  # specify the POS if needed
+            if lemmatized_word not in lemmatized_word_mapping:
+                lemmatized_word_mapping[lemmatized_word] = []
+            lemmatized_word_mapping[lemmatized_word].append(idx)
+
+        # Create a new combined matrix for lemmatized words
+        unique_lemmas = list(lemmatized_word_mapping.keys())
+
+        self.train = combine_columns(self.train, unique_lemmas, lemmatized_word_mapping)
+        self.test = combine_columns(self.test, unique_lemmas, lemmatized_word_mapping)
+        self.vocab_map = np.array(unique_lemmas)
 
 
 if __name__ == "__main__":
