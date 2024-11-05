@@ -25,7 +25,7 @@ def create_pipeline_and_params(model_name):
             #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
             ('model', ComplementNB())
         ])
-        param_grid = {'model__alpha': uniform(0.01, 0.7)}
+        param_grid = {'model__alpha': uniform(0.001, 0.7)}
     
     elif model_name == 'XGBoost':
         pipeline = Pipeline([
@@ -67,7 +67,7 @@ def create_pipeline_and_params(model_name):
 def tune_model(pipeline, param_grid, X_train, y_train):
     random_search = RandomizedSearchCV(
         pipeline, param_distributions=param_grid, scoring=scorer, cv=cv,
-        n_iter=5, n_jobs=1, random_state=0, verbose=3
+        n_iter=30, n_jobs=1, random_state=0, verbose=3
     )
     random_search.fit(X_train, y_train)
     print(f"Best F1 for {pipeline.named_steps['model'].__class__.__name__}:", random_search.best_score_)

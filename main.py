@@ -21,4 +21,4 @@ if __name__ == "__main__":
     best_ensemble_model = train_ensemble(X_train_undersampled, y_train_undersampled, model_names)
     #X_test_tfidf = best_ensemble_model.named_estimators_['complementnb'].named_steps['tfidf'].transform(data_preprocess.test)
     predictions = best_ensemble_model.predict(data_preprocess.test)
-    save_output(predictions, "ensemble_cnb_xgb_logreg", "random_search", "stopwords_undersampled")
+    save_output(predictions, "ensemble_cnb_xgb_logreg", "random_search_25_iter", "stopwords_undersampled")
