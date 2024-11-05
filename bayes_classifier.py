@@ -84,11 +84,11 @@ class BayesClassifier:
 
 
 def grid_search(X, y):
-    alpha = np.arange(0.001, 0.1, 0.001)
+    alpha = np.arange(0.01, 1, 0.01)
     param_grid = dict(alpha=alpha)
     print(param_grid)
     cv = StratifiedShuffleSplit(n_splits=5, test_size=0.3, random_state=42)
-    grid = GridSearchCV(ComplementNB(), param_grid=param_grid, cv=cv, scoring='f1', verbose=3)
+    grid = GridSearchCV(ComplementNB(), param_grid=param_grid, cv=cv, scoring='f1_weighted', verbose=3)
     grid.fit(X, y)
     return grid.best_params_, grid.best_score_
 
@@ -102,7 +102,8 @@ if __name__ == "__main__":
     print("tf-idf processed")
     # data_preprocess.apply_truncated_svd(100)
     # print('truncated svd applied!')
-    data_preprocess.remove_min_max(10, 0.999)
+    data_preprocess.remove_min_max(0.01, 0.999)
+    print("min-max removed")
 
     train = data_preprocess.train
     label_train = data_preprocess.label_train

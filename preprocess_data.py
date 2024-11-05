@@ -50,7 +50,7 @@ class DataPreprocess:
     def remove_min_max(self, min, max):
         # min or max can be absolute value or % value
         if 0 < max < 1:
-            max_tfidf_scores = np.max(self.train, axis=0)
+            max_tfidf_scores = np.sum(self.train, axis=0)
             percentile_threshold = np.percentile(max_tfidf_scores, max*100)
             features_to_keep = max_tfidf_scores <= percentile_threshold
             self.train = self.train[:,features_to_keep]
@@ -58,22 +58,22 @@ class DataPreprocess:
             # self.vocab_map = self.vocab_map[features_to_keep.get()]
             self.vocab_map = self.vocab_map[features_to_keep]
         elif max > 0:
-            max_tfidf_scores = np.max(self.train, axis=0)
+            max_tfidf_scores = np.sum(self.train, axis=0)
             idx_to_delete = np.argsort(max_tfidf_scores)[-max:]
             # self.vocab_map = nnp.delete(self.vocab_map, idx_to_delete, axis=0)
             self.vocab_map = nnp.delete(self.vocab_map, idx_to_delete.get(), axis=0)
             self.train = np.delete(self.train, idx_to_delete, axis=1)
             self.test = np.delete(self.test, idx_to_delete, axis=1)
         if 0 < min < 1:
-            min_tfidf_scores = np.min(self.train, axis=0)
+            min_tfidf_scores = np.sum(self.train, axis=0)
             percentile_threshold = np.percentile(min_tfidf_scores, min * 100)
-            features_to_keep = min_tfidf_scores <= percentile_threshold
+            features_to_keep = min_tfidf_scores >= percentile_threshold
             self.train = self.train[:, features_to_keep]
             self.test = self.test[:, features_to_keep]
             # self.vocab_map = self.vocab_map[features_to_keep.get()]
             self.vocab_map = self.vocab_map[features_to_keep]
         elif min > 0:
-            min_tfidf_scores = np.min(self.train, axis=0)
+            min_tfidf_scores = np.sum(self.train, axis=0)
             idx_to_delete = np.argsort(min_tfidf_scores)[-min:]
             # self.vocab_map = nnp.delete(self.vocab_map, idx_to_delete.get(), axis=0)
             self.vocab_map = nnp.delete(self.vocab_map, idx_to_delete, axis=0)
@@ -109,6 +109,8 @@ if __name__ == "__main__":
     print('test', dataPrepocess.test.shape)
     print('vocab_map', dataPrepocess.vocab_map.shape)
     print('label_train', dataPrepocess.label_train.shape)
+    print('label 0', np.sum(dataPrepocess.label_train == 0))
+    print('label 1', np.sum(dataPrepocess.label_train == 1))
 
     # dataPrepocess.remove_stopwords()
     # print('train', dataPrepocess.train.shape)
@@ -122,9 +124,9 @@ if __name__ == "__main__":
     # print('vocab_map', dataPrepocess.vocab_map.shape)
     # print('label_train', dataPrepocess.label_train.shape)
 
-    dataPrepocess.apply_truncated_svd(2000)
-    print('train', dataPrepocess.train.shape)
-    print('test', dataPrepocess.test.shape)
+    # dataPrepocess.apply_truncated_svd(2000)
+    # print('train', dataPrepocess.train.shape)
+    # print('test', dataPrepocess.test.shape)
 
     # dataPrepocess.initialize_tfidf()
     # dataPrepocess.remove_min_max(5, 0.999)
