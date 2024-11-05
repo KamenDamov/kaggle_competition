@@ -1,9 +1,13 @@
-import numpy as np
-import pandas as pd
 import scipy
+import numpy as np
 import matplotlib.pyplot as plt
-from collections import Counter
 import seaborn as sns
+from wordcloud import WordCloud
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from sklearn.metrics.pairwise import cosine_similarity
+import networkx as nx
+from collections import Counter
 
 from preprocess_data import DataPreprocess
 
@@ -183,6 +187,155 @@ def visualize_3d_svd(dataset_1, dataset_0):
     # Display plot
     plt.show()
 
+# 1. Word Frequency Histogram
+def plot_word_frequency(train, vocab_map):
+    word_counts = np.sum(train, axis=0)
+    sorted_indices = np.argsort(word_counts)[::-1]
+    plt.figure(figsize=(12, 6))
+    plt.bar([vocab_map[i] for i in sorted_indices[:30]], word_counts[sorted_indices[:30]], color='skyblue')
+    plt.xticks(rotation=90)
+    plt.title("Top 30 Word Frequencies")
+    plt.show()
+
+# 2. Word Cloud
+def plot_wordcloud(train, vocab_map):
+    word_counts = np.sum(train, axis=0)
+    word_freq = {vocab_map[i]: word_counts[i] for i in range(len(vocab_map))}
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate_from_frequencies(word_freq)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    plt.show()
+
+# 3. Heatmap of the Bag-of-Words Matrix
+def plot_bow_heatmap(train):
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(train, cmap="YlGnBu", cbar=True)  # Displaying a subset for clarity
+    plt.title("Bag-of-Words Matrix Heatmap (subset)")
+    plt.xlabel("Words")
+    plt.ylabel("Documents")
+    plt.show()
+
+# 4. TF-IDF Heatmap
+from sklearn.feature_extraction.text import TfidfTransformer
+def plot_tfidf_heatmap(train):
+    transformer = TfidfTransformer()
+    tfidf = transformer.fit_transform(train).toarray()
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(tfidf, cmap="YlGnBu", cbar=True)
+    plt.title("TF-IDF Matrix Heatmap (subset)")
+    plt.xlabel("Words")
+    plt.ylabel("Documents")
+    plt.show()
+
+# 5. Document Similarity Matrix
+def plot_document_similarity(train):
+    similarity_matrix = cosine_similarity(train)
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(similarity_matrix, cmap="coolwarm")
+    plt.title("Document Similarity Matrix")
+    plt.show()
+
+# 6. Dimensionality Reduction Scatter Plot (PCA & t-SNE)
+def plot_dim_reduction(train, label_train, method='pca'):
+    reducer = PCA(n_components=2) if method == 'pca' else TSNE(n_components=2, random_state=42)
+    reduced_data = reducer.fit_transform(train)
+    plt.figure(figsize=(8, 6))
+    plt.scatter(reduced_data[:, 0], reduced_data[:, 1], c=label_train, cmap="coolwarm", alpha=0.7)
+    plt.title(f"2D {method.upper()} of Documents")
+    plt.colorbar()
+    plt.show()
+
+# 7. Co-occurrence Network Graph
+def plot_cooccurrence_network(train, vocab_map, threshold=0.2):
+    cooccurrence = np.dot(train.T, train)
+    G = nx.Graph()
+    for i in range(len(vocab_map)):
+        for j in range(i + 1, len(vocab_map)):
+            if cooccurrence[i, j] > threshold:
+                G.add_edge(vocab_map[i], vocab_map[j], weight=cooccurrence[i, j])
+    plt.figure(figsize=(12, 12))
+    pos = nx.spring_layout(G, k=0.1)
+    nx.draw_networkx(G, pos, with_labels=True, node_size=50, edge_color="skyblue", font_size=10, alpha=0.7)
+    plt.title("Word Co-occurrence Network")
+    plt.show()
+
+# 8. Class-Word Relationship Visualization
+def plot_class_word_distribution(train, label_train, vocab_map):
+    word_counts_class0 = np.sum(train[label_train == 0], axis=0)
+    word_counts_class1 = np.sum(train[label_train == 1], axis=0)
+    sorted_indices = np.argsort(word_counts_class1 - word_counts_class0)[::-1]
+    plt.figure(figsize=(12, 10))
+    plt.bar([vocab_map[i] for i in sorted_indices[:30]], (word_counts_class1 - word_counts_class0)[sorted_indices[:30]], color='salmon')
+    plt.xticks(rotation=90)
+    plt.title("Top 30 Class-Word Differences")
+    plt.show()
+
+def plot_full_word_frequency_distribution(train, label_train, title):
+    train_0 = train[label_train==0]
+    train_1 = train[label_train==1]
+    word_counts = np.sum(train, axis=0)
+    word_counts_0 = np.sum(train_0, axis=0)
+    word_counts_1 = np.sum(train_1, axis=0)
+    plt.figure(figsize=(14, 10))
+    plt.hist(word_counts, bins=50, color='green')
+    plt.hist(word_counts_0, bins=50, color='blue')
+    plt.hist(word_counts_1, bins=50, color='red')
+    plt.yscale('log')  # Use log scale for y-axis to handle wide range of frequencies
+    plt.xlabel("Word Frequency")
+    plt.ylabel("Number of Words")
+    plt.title(title)
+    plt.legend(["Tous docs", "Label 0", "Label 1"])
+    plt.show()
+
+def plot_cumulative_word_distribution(train, label_train, title):
+    train_0 = train[label_train == 0]
+    train_1 = train[label_train == 1]
+    word_counts = np.sum(train, axis=0)
+    word_counts_0 = np.sum(train_0, axis=0)
+    word_counts_1 = np.sum(train_1, axis=0)
+    sorted_counts = np.sort(word_counts)[::-1]
+    sorted_counts_0 = np.sort(word_counts_0)[::-1]
+    sorted_counts_1 = np.sort(word_counts_1)[::-1]
+    cumulative_counts = np.cumsum(sorted_counts) / np.sum(sorted_counts)
+    cumulative_counts_0 = np.cumsum(sorted_counts_0) / np.sum(sorted_counts_0)
+    cumulative_counts_1 = np.cumsum(sorted_counts_1) / np.sum(sorted_counts_1)
+    plt.figure(figsize=(10, 6))
+    plt.plot(cumulative_counts, color='green')
+    plt.plot(cumulative_counts_0, color='blue')
+    plt.plot(cumulative_counts_1, color='red')
+    plt.xlabel("Words (sorted by frequency)")
+    plt.ylabel("Cumulative Proportion of Total Word Count")
+    plt.title(title)
+    plt.grid(True)
+    plt.legend(["Tous docs", "Label 0", "Label 1"])
+    plt.show()
+
+
+def plot_zipfs_law(train, label_train, title):
+    train_0 = train[label_train == 0]
+    train_1 = train[label_train == 1]
+    word_counts = np.sum(train, axis=0)
+    word_counts_0 = np.sum(train_0, axis=0)
+    word_counts_1 = np.sum(train_1, axis=0)
+    sorted_counts = np.sort(word_counts)[::-1]
+    sorted_counts_0 = np.sort(word_counts_0)[::-1]
+    sorted_counts_1 = np.sort(word_counts_1)[::-1]
+    ranks = np.arange(1, len(sorted_counts) + 1)
+    ranks_0 = np.arange(1, len(sorted_counts_0) + 1)
+    ranks_1 = np.arange(1, len(sorted_counts_1) + 1)
+
+    plt.figure(figsize=(10, 10))
+    plt.loglog(ranks, sorted_counts, color='green')
+    plt.loglog(ranks_0, sorted_counts_0, color='blue')
+    plt.loglog(ranks_1, sorted_counts_1, color='red')
+    plt.xlabel("Rank of Word (log scale)")
+    plt.ylabel("Frequency of Word (log scale)")
+    plt.title(title)
+    plt.grid(True, which="both", ls="--", lw=0.5)
+    plt.legend(["Tous docs", "Label 0", "Label 1"])
+    plt.show()
+
 def get_graphs(vocab_map, dataset, labels):
     # Créer un dataset pour les labels 1 et les labels 0
     dataset_1, dataset_0 = [], []
@@ -260,6 +413,65 @@ def main():
     # get_graphs(vocab_map, data_preprocess.train_tfidf, data_preprocess.label_train)
     # print("graphs generated!")
 
+def main_2():
+    data_preprocess = DataPreprocess()
+
+    train = data_preprocess.train
+    vocab_map = data_preprocess.vocab_map
+    label_train = data_preprocess.label_train
+
+    with open('english_stopwords', 'r') as f:
+        stopwords = [line.strip() for line in f.readlines()]
+    idx_stopwords = [i for i in range(len(vocab_map)) if vocab_map[i] in stopwords]
+    plot_full_word_frequency_distribution(train[:,idx_stopwords], label_train, "Overall Stopwords Frequency Distribution")
+
+    data_preprocess.apply_stemming()
+    data_preprocess.apply_lemmatization()
+    data_preprocess.remove_stopwords()
+    train = data_preprocess.train
+    vocab_map = data_preprocess.vocab_map
+    label_train = data_preprocess.label_train
+
+    with open('english_stopwords', 'r') as f:
+        stopwords = [line.strip() for line in f.readlines()]
+    idx_stopwords = [i for i in range(len(vocab_map)) if vocab_map[i] in stopwords]
+    plot_full_word_frequency_distribution(train[:,idx_stopwords], label_train, "Overall Stopwords Frequency Distribution")
+
+    print("Generating Word Frequency Histogram...")
+    plot_word_frequency(train, vocab_map)
+
+    print("Generating Word Cloud...")
+    plot_wordcloud(train, vocab_map)
+
+    print("Generating Heatmap of the Bag-of-Words Matrix...")
+    # plot_bow_heatmap(train)
+
+    print("Generating TF-IDF Heatmap...")
+    # plot_tfidf_heatmap(train)
+
+    print("Generating Document Similarity Matrix...")
+    # plot_document_similarity(train)
+
+    print("Generating 2D PCA Scatter Plot...")
+    # plot_dim_reduction(train, label_train, method='pca')
+
+    print("Generating 2D t-SNE Scatter Plot...")
+    # plot_dim_reduction(train, label_train, method='tsne')
+
+    print("Generating Co-occurrence Network Graph...")
+    # plot_cooccurrence_network(train, vocab_map, threshold=0.2)
+
+    print("Generating Class-Word Relationship Visualization...")
+    plot_class_word_distribution(train, label_train, vocab_map)
+
+    plot_full_word_frequency_distribution(train, label_train, "Overall Word Frequency Distribution")
+
+    plot_cumulative_word_distribution(train, label_train, "Cumulative Word Frequency Distribution")
+
+    plot_zipfs_law(train, label_train, "Zipf’s Law Plot")
+
+    print("All plots generated.")
+
 
 if __name__ == "__main__":
-    main()
+    main_2()
