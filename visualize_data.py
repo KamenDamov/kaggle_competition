@@ -4,6 +4,7 @@ import scipy
 import matplotlib.pyplot as plt
 from collections import Counter
 import seaborn as sns
+from sklearn.metrics.pairwise import cosine_similarity
 
 from preprocess_data import DataPreprocess
 
@@ -17,6 +18,26 @@ def print_stats(title, data):
   print(f"IQR: {scipy.stats.iqr(data)}")
   print(f"Kurtosis: {scipy.stats.kurtosis(data)}")
 
+def compute_cosine_similarities(dataset_1, dataset_0):
+    cosine_sim_matrix_class_1 = cosine_similarity(dataset_1)
+    cosine_sim_matrix_class_0 = cosine_similarity(dataset_0)
+
+    # Step 2: Display the matrix as a heatmap
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cosine_sim_matrix_class_1, annot=True, cmap='coolwarm', cbar=True,
+                xticklabels=[f'Vector {i}' for i in range(len(dataset_1))],
+                yticklabels=[f'Vector {i}' for i in range(len(dataset_1))])
+    plt.title('Cosine Similarity Matrix')
+    plt.show()
+
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cosine_sim_matrix_class_0, annot=True, cmap='coolwarm', cbar=True,
+                xticklabels=[f'Vector {i}' for i in range(len(dataset_0))],
+                yticklabels=[f'Vector {i}' for i in range(len(dataset_0))])
+    plt.title('Cosine Similarity Matrix')
+    plt.show()
+
+    
 
 # Longueur par document
 def length_of_docs(dataset_1, dataset_0, dataset):
@@ -79,7 +100,7 @@ def mean_length_of_words(dataset_similaire, dataset_assimilaire, dataset):
 def most_frequent_words(dataset, vocab_map, name):
     # TODO: mots les plus frequents par doc
     data = dataset.sum(axis=0)
-    top_idx = np.argsort(data)[-10:][::-1]
+    top_idx = np.argsort(data)[-20:][::-1]
     x, y= [], []
     for idx in top_idx:
         x.append(vocab_map[idx])
@@ -137,6 +158,7 @@ def get_graphs(vocab_map, dataset, labels):
     most_frequent_words(dataset_1, vocab_map, 'label 1')
     most_frequent_words(dataset_0, vocab_map, 'label 0')
     distribution_of_words(dataset_1, dataset_0, dataset)
+    compute_cosine_similarities(dataset_1, dataset_0)
 
 def main():
     print("processing data...")
