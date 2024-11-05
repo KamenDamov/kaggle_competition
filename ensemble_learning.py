@@ -14,11 +14,11 @@ from scipy.stats import uniform
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_predict
 
-# Cross-validation and scoring setup
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scorer = make_scorer(f1_score)
 
 def create_pipeline_and_params(model_name):
+    # TFIDF génèrent de moins bonnes perfo sur validation
     if model_name == 'ComplementNB':
         pipeline = Pipeline([
             #('tfidf', TfidfTransformer()),
@@ -71,16 +71,10 @@ def tune_model(pipeline, param_grid, X_train, y_train):
     )
     random_search.fit(X_train, y_train)
     print(f"Best F1 for {pipeline.named_steps['model'].__class__.__name__}:", random_search.best_score_)
-
-    # Get predictions across all folds to calculate confusion matrix for each fold
     y_pred = cross_val_predict(random_search.best_estimator_, X_train, y_train, cv=cv, method='predict')
-
-    # Print confusion matrix for each fold
     for fold, (train_idx, val_idx) in enumerate(cv.split(X_train, y_train)):
         y_val_true = y_train[val_idx]
         y_val_pred = y_pred[val_idx]
-
-        # Compute confusion matrix
         cm = confusion_matrix(y_val_true, y_val_pred)
         print(f'Confusion Matrix - Fold {fold + 1}:\n{cm}\n')
     

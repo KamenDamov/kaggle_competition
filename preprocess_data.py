@@ -69,19 +69,17 @@ def boostrap_oversampling(X, y, new_samples=1000):
     
     return X_resampled, y_resampled
 
-def random_undersampling(X, y, new_samples=3562):
+def random_undersampling(X, y, new_samples=4000):
     unique, counts = np.unique(y, return_counts=True)
     majority_class = unique[np.argmax(counts)]
     majority_indices = np.where(y == majority_class)[0]
     minority_indices = np.where(y != majority_class)[0]
-    np.random.seed(42)  # For reproducibility
+    np.random.seed(42)
     majority_downsampled_indices = np.random.choice(
         majority_indices, size=(len(majority_indices) - new_samples), replace=False
     )
     resampled_indices = np.concatenate([majority_downsampled_indices, minority_indices])
     np.random.shuffle(resampled_indices)
-    #non_zero_columns = np.array((X[resampled_indices].sum(axis=0) != 0)).flatten()
-    #X_filtered = X[resampled_indices][:, non_zero_columns]
     return X[resampled_indices], y[resampled_indices]
 
 
