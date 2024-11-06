@@ -50,6 +50,12 @@ def f1_score_keras(y_true, y_pred):
     f1 = 2 * (precision * recall) / (precision + recall + backend.epsilon())
     return backend.mean(f1)
 
+def random_split(X: np.array, y: np.array, split_ratio: float = 0.9):
+    indices = np.random.permutation(len(X))
+    split_index = int(len(X) * split_ratio)
+    train_indices = indices[:split_index]
+    val_indices = indices[split_index:]
+    return X[train_indices], y[train_indices], X[val_indices], y[val_indices]
 
 def main():
     data_preprocess = DataPreprocess()
@@ -70,6 +76,8 @@ def main():
     print('test:', test.shape)
     print('Ratio of 1 in train:', np.sum(label_train == 1) / len(label_train))
 
+    X_train, y_train, X_val, y_val = random_split(train, label_train, 0.9)
+
     # Define the model
     model = Sequential([
         Dense(128, activation='relu', input_shape=(train.shape[1],)),  # Input layer with 128 units
@@ -81,9 +89,9 @@ def main():
     # best_params_, best_score_ = grid_search(train, label_train, model)
     # print('best params: {}, score: {}'.format(best_params_, best_score_))
 
-    history = model.fit(train, label_train, epochs=6, batch_size=32, validation_data=(train[8000:], label_train[8000:]))
-    test_loss, test_f1 = model.evaluate(train[8000:], label_train[8000:])
-    print("final loss:", test_loss, "final f1_score:", test_f1)
+    history = model.fit(X_train, y_train, epochs=10, batch_size=32, validation_data=(X_val, y_val))
+    train_loss, train_f1 = model.evaluate(X_train, y_train)
+    print("final loss:", train_loss, "final f1_score:", train_f1)
 
     print(f"f1_score on train: {f1_score(label_train, (np.array([x[0] for x in model.predict(train)]) > 0.5).astype(int))}")
     plot_accuracy(history)
