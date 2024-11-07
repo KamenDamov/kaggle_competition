@@ -6,7 +6,7 @@ from collections import Counter
 import seaborn as sns
 from sklearn.metrics.pairwise import cosine_similarity
 
-from preprocess_data import DataPreprocess
+from preprocess_data import DataPreprocess, remove_cum_sum
 
 
 def print_stats(title, data):
@@ -111,6 +111,18 @@ def most_frequent_words(dataset, vocab_map, name):
     plt.ylabel("Mot")
     plt.show()
 
+def check_sparsity_decrease(data: np.array):
+    thresholds = np.linspace(0.1, 1, 10)
+    sparsity_perc = []
+    for tresh in thresholds: 
+        reduced_data_indeces = remove_cum_sum(data, tresh)
+        reduced_data = np.delete(data, reduced_data_indeces, axis=1)
+        sparsity_perc.append(np.nonzero(reduced_data)[0].shape[0] / reduced_data.size)
+
+    print(thresholds)
+    print(sparsity_perc)
+    plt.plot(thresholds, sparsity_perc)
+    plt.show()
 
 def distribution_of_words(dataset_1, dataset_0, dataset):
     data_1 = np.sort(dataset_1.sum(axis=0) / dataset_1.sum())
@@ -159,6 +171,8 @@ def get_graphs(vocab_map, dataset, labels):
     most_frequent_words(dataset_0, vocab_map, 'label 0')
     distribution_of_words(dataset_1, dataset_0, dataset)
     compute_cosine_similarities(dataset_1, dataset_0)
+
+
 
 def main():
     print("processing data...")
