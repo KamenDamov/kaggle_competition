@@ -67,7 +67,7 @@ def create_pipeline_and_params(model_name):
 def tune_model(pipeline, param_grid, X_train, y_train):
     random_search = RandomizedSearchCV(
         pipeline, param_distributions=param_grid, scoring=scorer, cv=cv,
-        n_iter=30, n_jobs=1, random_state=0, verbose=3
+        n_iter=15, n_jobs=1, random_state=0, verbose=3
     )
     random_search.fit(X_train, y_train)
     print(f"Best F1 for {pipeline.named_steps['model'].__class__.__name__}:", random_search.best_score_)
