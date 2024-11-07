@@ -6,6 +6,7 @@ from sklearn.preprocessing import FunctionTransformer
 from scipy.sparse import csr_matrix
 from sklearn.metrics import f1_score, make_scorer
 import numpy as np
+from sklearn.linear_model import RidgeClassifier, SGDClassifier
 from sklearn.naive_bayes import ComplementNB
 from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression
@@ -58,6 +59,18 @@ def create_pipeline_and_params(model_name):
             'model__C': uniform(0.1, 10),
             'model__kernel': ['linear', 'rbf']
         }
+    elif model_name == 'SGD':
+        pipeline = Pipeline([
+            #('tfidf', TfidfTransformer()),
+            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
+            ('model', SGDClassifier())
+        ])
+        param_grid = {
+            'model__loss': ['hinge', 'log-loss'],
+            'model__penalty': ['l1', 'elasticnet'],
+            'model__alpha': np.logspace(-5, 5, 10),
+            'model__l1_ratio': np.linspace(0.01, 1, 10)
+        }
 
     else:
         raise ValueError(f"Model {model_name} is not defined.")
@@ -67,7 +80,7 @@ def create_pipeline_and_params(model_name):
 def tune_model(pipeline, param_grid, X_train, y_train):
     random_search = RandomizedSearchCV(
         pipeline, param_distributions=param_grid, scoring=scorer, cv=cv,
-        n_iter=30, n_jobs=1, random_state=0, verbose=3
+        n_iter=10, n_jobs=1, random_state=0, verbose=3
     )
     random_search.fit(X_train, y_train)
     print(f"Best F1 for {pipeline.named_steps['model'].__class__.__name__}:", random_search.best_score_)

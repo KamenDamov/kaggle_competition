@@ -94,6 +94,33 @@ def combine_columns(X, unique_words, word_mapping):
     return new_X
 
 
+def remove_cum_sum(all_data: np.array, threshold: float) -> np.array:
+    # Step 1: Calculate the total frequency of each feature
+    feature_sums = np.sum(all_data, axis=0)
+
+    # Step 2: Sort features by frequency in descending order without changing original indices
+    sorted_indices = np.argsort(feature_sums)[::-1]
+    sorted_sums = feature_sums[sorted_indices]
+
+    # Step 3: Calculate cumulative sum on the sorted frequencies
+    cum_sum = np.cumsum(sorted_sums)
+    total_sum = cum_sum[-1]
+
+    # Step 4: Identify the cutoff point where cumulative sum reaches the threshold
+    cutoff_index = np.searchsorted(cum_sum, total_sum * threshold)
+
+    # Step 5: Use sorted indices up to the cutoff to determine features to keep in original order
+    indices_to_keep = sorted_indices[:cutoff_index + 1]
+
+    # Step 6: Create a mask for the original data shape, marking features to remove
+    mask = np.ones(feature_sums.shape, dtype=bool)
+    mask[indices_to_keep] = False
+
+    # Return the indices of features to remove in the original order
+    indices_to_remove = np.where(mask)[0]
+    return indices_to_remove
+
+
 class DataPreprocess:
     test: np.array = np.array([]) 
     train: np.array = np.array([])
