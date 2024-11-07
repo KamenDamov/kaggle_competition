@@ -86,7 +86,8 @@ class DataPreprocess:
         # TODO: use list instead of opening document
         with open('english_stopwords', 'r') as f:
             stopwords = [line.strip() for line in f.readlines()]
-        idx_stopwords = [i for i in range(len(self.vocab_map)) if self.vocab_map[i] in stopwords and np.sum(self.train[:,i]) > 10000]
+        idx_stopwords = [i for i in range(len(self.vocab_map)) if self.vocab_map[i] in stopwords]
+        # idx_stopwords = [i for i in range(len(self.vocab_map)) if self.vocab_map[i] in stopwords and np.sum(self.train[:,i]) > 10000]
         self.vocab_map = nnp.delete(self.vocab_map, idx_stopwords, axis=0)
         self.train = np.delete(self.train, idx_stopwords, axis=1)
         self.test = np.delete(self.test, idx_stopwords, axis=1)
