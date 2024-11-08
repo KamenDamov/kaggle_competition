@@ -16,12 +16,12 @@ if __name__ == '__main__':
     X_train, y_train = random_undersampling(data_preprocess.train, data_preprocess.label_train)
 
     pipeline, param_grid = create_pipeline_and_params(model_name)
-    best_model = tune_model(pipeline, param_grid, X_train, y_train)
+    best_model, best_params = tune_model(pipeline, param_grid, X_train, y_train)
 
     best_model.fit(X_train, y_train)
     predictions = best_model.predict(data_preprocess.test)
 
-    params = f"loss={best_model.loss}penalty={best_model.penalty}alpha={best_model.alpha}l1_ratio={best_model.l1_ratio}"
+    params = f"loss=log_loss-penalty=elasticnet-alpha={best_params['model__alpha']}-l1_ratio={best_params['model__l1_ratio']}"
 
-    save_output(predictions, "ridge", "random_search_10_iter", "cum-sum_undersampling")
+    save_output(predictions, "ridge", params, "cum-sum_undersampling")
 

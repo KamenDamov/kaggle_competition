@@ -63,12 +63,10 @@ def create_pipeline_and_params(model_name):
         pipeline = Pipeline([
             #('tfidf', TfidfTransformer()),
             #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
-            ('model', SGDClassifier())
+            ('model', SGDClassifier(loss='hinge', penalty='elasticnet'))
         ])
         param_grid = {
-            'model__loss': ['hinge', 'log-loss'],
-            'model__penalty': ['l1', 'elasticnet'],
-            'model__alpha': np.logspace(-5, 5, 10),
+            'model__alpha': np.logspace(-10, -4, 10),
             'model__l1_ratio': np.linspace(0.01, 1, 10)
         }
 
@@ -91,7 +89,7 @@ def tune_model(pipeline, param_grid, X_train, y_train):
         cm = confusion_matrix(y_val_true, y_val_pred)
         print(f'Confusion Matrix - Fold {fold + 1}:\n{cm}\n')
     
-    return random_search.best_estimator_
+    return random_search.best_estimator_, random_search.best_params_
 
 def train_ensemble(X_train, y_train, model_names):
 
@@ -99,7 +97,7 @@ def train_ensemble(X_train, y_train, model_names):
     
     for model_name in model_names:
         pipeline, param_grid = create_pipeline_and_params(model_name)
-        best_model = tune_model(pipeline, param_grid, X_train, y_train)
+        best_model, best_params = tune_model(pipeline, param_grid, X_train, y_train)
         tuned_models.append((model_name.lower(), best_model))
     
     ensemble = VotingClassifier(estimators=tuned_models, voting='soft')
