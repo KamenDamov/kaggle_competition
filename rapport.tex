@@ -1,0 +1,35 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsfonts}
+\usepackage[left=20mm, right=20mm]{geometry}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\title{Kaggle Competition - Rapport}
+\author{kamendamov123 }
+\date{November 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+La présente compétition consiste à trouver $f \in F$ avec $F$ une famille riche de fonctions (linéaire, arbres de décisions, bayésiennes, etc.) pour un problème de classification binaire sur un corpus de texte qui est représenté par des vecteurs de compte. Les données sont déjà séparées pour le test et l'entraînement tel que, $X_{train} \in \mathbb{N}^{9000 \times 26000}$, et $X_{test} \in \mathbb{N}^{2300 \times 26000}$. Étant donné la sparsité des données, et le fait que les vecteurs d'entrées sont des fréquences, nous avons eu l'intuition de prioriser les approches fréquentistes qui sont robustes face au problème de sparsité, sont adaptés pour les données de fréquences, et sont relativement rapide à implémenter. Pour le premier jalon, nous avons implémenter un modèle Naif de Bayes avec validation croisée pour le lissage de Laplace, sans prétraitement des données. Cette méthode nous a donné sur un score de ... sur la validation et de 0.7358... sur l'ensemble de test fournis. Pour le deuxième jalon, nous avons fait un prétraitement plus exhaustif des données, en explorant les techniques pour réduire la dimensionnalité, balancer les données en sur-échantillonant ou en sous-échantillonant, retirer les mots sans importance, et appliquer des transformations TFIDF à nos ensembles d'entraînement et de test indépendamment. De plus, nous avons élargi l'ensemble de fonctions à tester allant de familles de modèles fréquentistes (tel que la Naive de Bayes et le Complement de Bayes), modèles à base d'arbres (XGBoost), modèles linéaires (SVM et régression logistique) et modèles ensemblistes (ensemble models en anglais) par vote. Nous avons également utilisé la procédure de validation croisée pour trouver les meilleurs hyperparamètres de chacun de ces modèles. Le modèle le plus performant était un modèle ensembliste qui avait un score F1 de 0.66 sur l'ensemble de validation et 0.74... sur l'ensemble de test.    
+
+\section{Prétraitement des données}
+\subsection{Rééchantillonage}
+Comment mentionné, n'avons pas appliqué de prétraitement de données lors du premier jalon, nous avons directement appliqué la Naive de Bayes à nos données. Cela dit, pour le deuxième jalon, nous avons tout d'abord constaté le débalancement de classe dans $X_{train}$ étant d'environ $76\%$ dans la classe 1 et de $14\%$ dans la classe 0. Les sous-sections suivantes discutent nos choix de rééchantillonage.
+\subsubsection{SMOTE}
+Nous avons d'abord tenter de suréchantilloner notre jeu de données avec une technique de génération d'échantillon synthétique, soit SMOTE. Cette méthode se base l'algorithme de K plus proche voisins pour générer des nouveaux points de données dans le voisinage d'un point de la classe minoritaire. Pour un point donné $x_i$ et $x_{voisin}$ un des k points les plus proches de $x_i$, on génère $x_{synth}$ ainsi:\\
+$$x_{synth} = x_i + \lambda (x_{voisin} - x_i)$$ avec $\lambda \in [0, 1]$.
+Nous générons $1000$ observations dans la classe minoritaire.
+\subsubsection{Boostrap}
+Étant donnée que le ratio entre les données d'entraînement et test est de $20\%$, nous avons songé à l'impact de réduire le nombre d'observation de la classe majoritaire au point d'avoir une séparation entraînement/test d'environ 70/30, plutôt que 80/20. Nous obtenons la proportion 70/30 en retirant la moitié des données dans la classe majoritaire, aléatoirement. Nos classes restes débalancées, mais nous passons d'un ratio de 76/14 à environ 60/40. Voir annexes pour ces graphiques
+\subsection{Réduction de dimensions}
+Étant donné que nos vecteurs sont de très haute dimension, nous avons penser à retirer des attributs (qui sont des mots) pour faciliter l'entraînement et enlever des atributs qui n'apportent aucune information quant à la discrimination dans la classe 0 ou 1. Nous avons testé deux méthodes pour réduire les 
+\subsubsection{Réduction à base d'arbres}
+Nous utilisons un arbre de décision standard avec critère de Gini comme pour 
+\subsubsection{Réduction à base de fréquences cumulatives}
+\subsection{Transformation TFIDF}
+\end{document}
