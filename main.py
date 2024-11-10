@@ -11,9 +11,9 @@ if __name__ == "__main__":
     #visualize_data.check_sparsity_decrease(data_preprocess.train)
 
     #indeces_to_remove = remove_cum_sum(np.concatenate((data_preprocess.train, data_preprocess.test), axis=0), 0.99)
-    indeces_to_remove = remove_cum_sum(data_preprocess.train, 0.95)
-    data_preprocess.train = np.delete(data_preprocess.train, indeces_to_remove, axis=1)
-    data_preprocess.test = np.delete(data_preprocess.test, indeces_to_remove, axis=1)
+    #indeces_to_remove = remove_cum_sum(data_preprocess.train, 0.95)
+    #data_preprocess.train = np.delete(data_preprocess.train, indeces_to_remove, axis=1)
+    #data_preprocess.test = np.delete(data_preprocess.test, indeces_to_remove, axis=1)
 
     X_train_undersampled, y_train_undersampled = random_undersampling(data_preprocess.train, data_preprocess.label_train)
 
