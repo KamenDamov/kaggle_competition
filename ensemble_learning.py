@@ -6,7 +6,7 @@ from sklearn.preprocessing import FunctionTransformer
 from scipy.sparse import csr_matrix
 from sklearn.metrics import f1_score, make_scorer
 import numpy as np
-from sklearn.naive_bayes import ComplementNB
+from sklearn.naive_bayes import ComplementNB, MultinomialNB
 from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
@@ -25,7 +25,7 @@ def create_pipeline_and_params(model_name):
             #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
             ('model', ComplementNB())
         ])
-        param_grid = {'model__alpha': uniform(0.001, 0.7)}
+        param_grid = {'model__alpha': uniform(0.01, 0.7)}
     
     elif model_name == 'XGBoost':
         pipeline = Pipeline([
@@ -48,6 +48,14 @@ def create_pipeline_and_params(model_name):
         ])
         param_grid = {'model__C': uniform(0.1, 10), 'model__penalty': ['l1'], 'model__solver': ['liblinear']}
 
+    elif model_name == 'MultinomialNB':
+        pipeline = Pipeline([
+            #('tfidf', TfidfTransformer()),
+            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
+            ('model', MultinomialNB())
+        ])
+        param_grid = {'model__alpha': uniform(0.01, 0.7)}
+
     elif model_name == 'SVC':
         pipeline = Pipeline([
             #('tfidf', TfidfTransformer()),
@@ -67,9 +75,10 @@ def create_pipeline_and_params(model_name):
 def tune_model(pipeline, param_grid, X_train, y_train):
     random_search = RandomizedSearchCV(
         pipeline, param_distributions=param_grid, scoring=scorer, cv=cv,
-        n_iter=15, n_jobs=1, random_state=0, verbose=3
+        n_iter=7, n_jobs=1, random_state=0, verbose=3
     )
     random_search.fit(X_train, y_train)
+    print(f"Best Parameters for {pipeline.named_steps['model'].__class__.__name__}:", random_search.best_params_)
     print(f"Best F1 for {pipeline.named_steps['model'].__class__.__name__}:", random_search.best_score_)
     y_pred = cross_val_predict(random_search.best_estimator_, X_train, y_train, cv=cv, method='predict')
     for fold, (train_idx, val_idx) in enumerate(cv.split(X_train, y_train)):
@@ -89,7 +98,7 @@ def train_ensemble(X_train, y_train, model_names):
         best_model = tune_model(pipeline, param_grid, X_train, y_train)
         tuned_models.append((model_name.lower(), best_model))
     
-    ensemble = VotingClassifier(estimators=tuned_models, voting='soft')
+    ensemble = VotingClassifier(estimators=tuned_models, weights = [2,1,1] ,voting='soft')
     ensemble.fit(X_train, y_train)
     
     return ensemble
