@@ -1,7 +1,7 @@
 import numpy as np
 from preprocess_data import DataPreprocess
 import csv
-import tqdm
+from tqdm import tqdm
 
 from save_output import save_output
 
