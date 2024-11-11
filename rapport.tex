@@ -1,14 +1,13 @@
 \documentclass{article}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{amsfonts}
-\usepackage[left=20mm, right=20mm]{geometry}
+\usepackage[left=15mm, right=15mm, top = 15mm]{geometry}
 \usepackage{amsmath}
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \DeclareMathOperator*{\argmax}{argmax}
 
 \title{Kaggle Competition - Rapport}
-\author{kamendamov123 }
 \author{Guillaume Genois, 20248507}
 \date{November 2024}
 
@@ -20,7 +19,7 @@
 La présente compétition consiste à trouver $f \in F$ avec $F$ une famille riche de fonctions (linéaire, arbres de décisions, bayésiennes, etc.) pour un problème de classification binaire sur un corpus de texte qui est représenté par des vecteurs de compte. Les données sont déjà séparées pour le test et l'entraînement tel que, $X_{train} \in \mathbb{N}^{9000 \times 26000}$, et $X_{test} \in \mathbb{N}^{2300 \times 26000}$. Étant donné la sparsité des données, et le fait que les vecteurs d'entrées sont des fréquences, nous avons eu l'intuition de prioriser les approches fréquentistes qui sont robustes face au problème de sparsité, sont adaptés pour les données de fréquences, et sont relativement rapide à implémenter. Pour le premier jalon, nous avons implémenter un modèle Naif de Bayes avec validation croisée pour le lissage de Laplace, sans prétraitement des données. Cette méthode nous a donné sur un score de ... sur la validation et de 0.7358... sur l'ensemble de test fournis. Pour le deuxième jalon, nous avons fait un prétraitement plus exhaustif des données, en explorant les techniques pour réduire la dimensionnalité, balancer les données en sur-échantillonant ou en sous-échantillonant, retirer les mots sans importance, et appliquer des transformations TFIDF à nos ensembles d'entraînement et de test indépendamment. De plus, nous avons élargi l'ensemble de fonctions à tester allant de familles de modèles fréquentistes (tel que la Naive de Bayes et le Complement de Bayes), modèles à base d'arbres (XGBoost), modèles linéaires (SVM et régression logistique) et modèles ensemblistes (ensemble models en anglais) par vote. Nous avons également utilisé la procédure de validation croisée pour trouver les meilleurs hyperparamètres de chacun de ces modèles. Le modèle le plus performant était un modèle ensembliste qui avait un score F1 de 0.66 sur l'ensemble de validation et 0.74... sur l'ensemble de test.
 
 \section{Conception de fonctionnalité}
-Nous avons constater plusieurs axes de prétraietment qui pourraient améliorer la performance de nos algorithmes.
+Nous avons constater plusieurs axes de prétraietment qui pourraient améliorer la performance de nos algorithmes. Nous énumérons les techniques utilisées dans cette section, mais il est important de noter que ces méthodes ne sont pas utilisées ensemble 
 \subsection{Rééchantillonage}
 Comment mentionné, n'avons pas appliqué de prétraitement de données lors du premier jalon, nous avons directement appliqué la Naive de Bayes à nos données. Cela dit, pour le deuxième jalon, nous avons tout d'abord constaté le débalancement de classe dans $X_{train}$ étant d'environ $76\%$ dans la classe 1 et de $14\%$ dans la classe 0. Les sous-sections suivantes discutent nos choix de rééchantillonage.
 \subsubsection{SMOTE}
@@ -57,17 +56,24 @@ Nous implémentons une validation croisée (k-fold cross validation) avec $k = 7
 
 \section{Algorithmes d'apprentissage utilisés}
 Nous avons effectué multiples expériences avec multiples algorithmes d'apprentissage différents. Les algorithmes qui ont été les plus efficaces sont ceux présentés ci-après.
-\subsection{Classifieur Bayes naïf}
+\subsection{Classifieur Complément de Bayes naïf}
+
+Comme nous avons décrit le complément de Bayes
 
 \subsection{Classifieur XGBoost}
 Nous avons également exploré l’application d’un modèle basé sur des arbres au problème. Cet algorithme crée une série d'arbres de décision, chaque arbre subséquent étant formé pour corriger les erreurs des arbres précédents, en utilisant les gradients et Hessians de l’erreur pour orienter ses subdivisions. Contrairement au vote majoritaire utilisé dans des méthodes comme la forêt aléatoire, XGBoost produit une prédiction finale en sommant les prédictions pondérées de chaque arbre. Comme pour le critère de Gini mentionné plus haut, XGBoost utilise un critère de gain de subdivision pour déterminer les branchements de chaque arbre de décision. Ce gain de subdivision est défini par la formule suivante : 
 $$\text{Gain} = \frac{1}{2} \left( \frac{(\sum \text{gradients}_{\text{gauche}})^2}{\sum \text{Hessians}_{\text{gauche}} + \lambda} + \frac{(\sum \text{gradients}_{\text{droite}})^2}{\sum \text{Hessians}_{\text{droite}} + \lambda} - \frac{(\sum \text{gradients}_{\text{total}})^2}{\sum \text{Hessians}_{\text{total}} + \lambda} \right) - \gamma$$
 Avec $\sum \text{gradients}$ étant la somme des gradients pour le sous-ensmeble à gauche ou droite de la subdivision, 
 Avec $\sum \text{gradients}_{\text{total}}$ somme des gradients pour l’ensemble complet avant la subdivision. $\sum \text{Hessians}$ est la somme des Hessiens (dérivées secondes). Notons que les gardients et Hessiens sont calculés à partir de la perte d'entropie croisée: $$\text{Log Loss} = -\frac{1}{N} \sum_{i=1}^{N} \left( y_i \cdot \log(\hat{y}_i) + (1 - y_i) \cdot \log(1 - \hat{y}_i) \right)$$
+Avec respectivement la dérivée première pour le gradient et seconde pour l'Hessien.
+$$\frac{\partial \text{Log Loss}}{\partial \hat{y}_i} = \frac{\hat{y}_i - y_i}{\hat{y}_i (1 - \hat{y}_i)}$$
+$$\frac{\partial^2 \text{Log Loss}}{\partial \hat{y}_i^2} = \frac{1 - y_i}{\hat{y}_i^2} + \frac{y_i}{(1 - \hat{y}_i)^2}
+$$
 Avec  $\hat{y}_i$ est la classe prédite et $y_i$ est la vraie classe.
 XGBoost utilise ainsi la somme des gradients et des Hessians pour guider la construction de chaque arbre, en choisissant les divisions qui maximisent le gain de subdivision pour minimiser l’erreur totale.  
 \subsection{Classifieur régression ridge}
 \subsection{Classifieur d'apprentissage par ensembles}
+Nous avons tenter combiner plusieurs modèles de nature différentes et aggréger leurs prédictions dans le but d'augmenter la performance sur le score F1. Cette procédure consiste à entraîner indépendamment des classificateurs et procéder à un vote lisse en extrayant et aggrégeant les probabilités de classification de chaque modèle dans l'ensemble. Dans notre cas, nous avons entraîner un classifieur complémentaire de Bayes (une modèle fréquentiste), un classifieur XGBoost (modèle à base d'arbres de décision), et une régression logistique (classifieur linéaire). Il est important de noter que nous avons choisi ces modèles pour avoir une frontière de décision de nature différente, et avoir des estimations plus robustes, qui ne sont pas biaisées par la similarité de la frontière de décision apprise entre les modèles. Voir algorithme 1 dans l'annexe, pour une description plus rigoureuse de la méthode.
 
 \subsection{Autres}
 Ces prochains algorithmes de classification ont aussi été essayés sans que leurs résultats soient assez concluants.
@@ -78,11 +84,9 @@ Ces prochains algorithmes de classification ont aussi été essayés sans que le
 
 \section{Méthodologie}
 \subsection{Répartition pour l'entrainement et la validation}
+Pour tout les algorithmes et prétraitement choisis, nous avons appliquer une validation croisée k-fold avec $k = 5$ stratfiées. La stratification dans la séparation des données en ensemble d'entraînement et de validation est cruciale car nous avons un jeu de données débalancés (malgré le rebalancement mentionné plus haut). Ainsi, nous avons une représentation proportionelle des étiquettes de la classe $0$ et $1$ dans la l'ensemble d'entraînement et de validation. 
 \subsection{Ajustement des hyperparamètres}
-Gridsearch (linear et log)
-randomsearch
-k-fold
-
+Nous utilisons la procédure de recherche aléatoire pour trouver la meilleure combinaison d'hyperparamètres. La meilleure combinaison d'hyperparamètres est choisies en moyennant le score F1 pour chaque combinaison d'hyperparamètres Nous priorisons cette procédure plutôt qu'une recherche en grille par soucis computationnel. 
 \subsection{Astuces d'optimisation}
 
 \section{Résultats}
@@ -97,5 +101,31 @@ k-fold
 les sites desquels nous nous sommes inspirés
 
 \section{Annexes}
+\subsection{Graphiques}
+\subsection{Algorithmes}
+\subsubsection{Classifieur par ensemble}
+\begin{algorithm}
+\caption{Algorithme de Vote Lisse pour un Classifieur Ensembliste}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} Un ensemble de modèles  $\Gamma = \{\gamma_1, \gamma_2, \dots, \gamma_k\}$, des poids associés $\{w_1, w_2, \dots, w_k\}$, un échantillon à classifier $x$.
+\STATE \textbf{Output:} Classe prédite pour l'échantillon $x$.
+
+\FORALL{$\gamma_i \in \Gamma$ }
+    \STATE Obtenir la probabilité prédite pour chaque classe $c$ : $P(c|x, M_i)$.
+\ENDFOR
+
+\FOR{chaque classe $c$}
+    \STATE Calculer la probabilité agrégée pour la classe $c$ :
+    \[
+    P(c|x) = \frac{\sum_{i=1}^k w_i \cdot P(c|x, M_i)}{\sum_{i=1}^k w_i}
+    \]
+\ENDFOR
+
+\STATE Retourner la classe avec la probabilité agrégée maximale :
+\[
+\hat{y} = \arg\max_c P(c|x)
+\]
+\end{algorithmic}
+\end{algorithm}
 graphiques
 \end{document}
