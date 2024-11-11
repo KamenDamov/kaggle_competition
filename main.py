@@ -1,6 +1,6 @@
 import numpy as np
 from preprocess_data import DataPreprocess, random_undersampling, remove_cum_sum
-import visualize_data
+# import visualize_data
 from ensemble_learning import train_ensemble, estimate
 from complement_naive_bayes import train_cnb_with_tfidf
 
@@ -8,6 +8,7 @@ from  save_output import save_output
 
 if __name__ == "__main__":
     data_preprocess = DataPreprocess()
+    data_preprocess.remove_stopwords()
     #visualize_data.check_sparsity_decrease(data_preprocess.train)
 
     #indeces_to_remove = remove_cum_sum(np.concatenate((data_preprocess.train, data_preprocess.test), axis=0), 0.99)
@@ -18,10 +19,11 @@ if __name__ == "__main__":
     X_train_undersampled, y_train_undersampled = random_undersampling(data_preprocess.train, data_preprocess.label_train)
 
     # Lancer le VotingClassifier
-    model_names = ['ComplementNB', 'XGBoost', 'LogisticRegression'] #, 'SVC' 
+    # model_names = ['SGD']
+    model_names = ['ComplementNB', 'XGBoost', 'SVC']
     best_ensemble_model = train_ensemble(X_train_undersampled, y_train_undersampled, model_names)
     predictions_voter = best_ensemble_model.predict(data_preprocess.test)
-    save_output(predictions_voter, "ensemble_cnb_xgboost_logreg", "random_search_15_iter", "cumulative_sum_undersampled")
+    save_output(predictions_voter, "cnb_xgb_svc", "random_search_15_iter", "stopwords_cumulative_sum_undersampled")
     
     # Lancer le Complement Naive Bayes
     #best_cnb_model = train_cnb_with_tfidf(X_train_undersampled, y_train_undersampled)

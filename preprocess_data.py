@@ -133,8 +133,8 @@ class DataPreprocess:
             lines = file.readlines()[1:]
         self.label_train = np.array([int(label.split(",")[-1].strip()) for label in lines])
 
-        self.train = np.array(self.train, dtype=np.int8)
-        self.test = np.array(self.test, dtype=np.int8)
+        self.train = np.array(self.train, dtype=np.float32)
+        self.test = np.array(self.test, dtype=np.float32)
 
 
     def initialize_tfidf(self):
@@ -149,7 +149,7 @@ class DataPreprocess:
         # TODO: use list instead of opening document
         with open('english_stopwords', 'r') as f:
             stopwords = [line.strip() for line in f.readlines()]
-        idx_stopwords = [i for i in range(len(self.vocab_map)) if self.vocab_map[i] in stopwords]
+        idx_stopwords = [i for i in range(len(self.vocab_map)) if self.vocab_map[i] in stopwords and np.sum(self.train[:,i]) > 10000]
         self.vocab_map = np.delete(self.vocab_map, idx_stopwords, axis=0)
         self.train = np.delete(self.train, idx_stopwords, axis=1)
         self.test = np.delete(self.test, idx_stopwords, axis=1)

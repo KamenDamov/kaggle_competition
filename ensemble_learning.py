@@ -1,17 +1,17 @@
 from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 from sklearn.ensemble import VotingClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.preprocessing import FunctionTransformer
+from cuml.pipeline import Pipeline
+from cuml.feature_extraction.text import TfidfTransformer
+from cuml.preprocessing import FunctionTransformer
 from scipy.sparse import csr_matrix
 from sklearn.metrics import f1_score, make_scorer
 import numpy as np
-from sklearn.naive_bayes import ComplementNB
+from cuml.naive_bayes import ComplementNB
 from xgboost import XGBClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression, SGDClassifier
+from cuml.svm import SVC
 from scipy.stats import uniform
-from sklearn.metrics import confusion_matrix
+from cuml.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_predict
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -50,13 +50,20 @@ def create_pipeline_and_params(model_name):
 
     elif model_name == 'SVC':
         pipeline = Pipeline([
-            #('tfidf', TfidfTransformer()),
-            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
-            ('model', SVC(probability=True))
+            ('model', SVC(kernel='rbf', probability=True))
         ])
         param_grid = {
-            'model__C': uniform(0.1, 10),
-            'model__kernel': ['linear', 'rbf']
+            'model__C': np.arange(45, 55, 1),
+            'model__gamma': np.arange(0.003, 0.02, 0.001)
+        }
+
+    elif model_name == 'SGD':
+        pipeline = Pipeline([
+            ('model', SGDClassifier(loss='modified_huber', penalty='elasticnet', max_iter=10000))
+        ])
+        param_grid = {
+            'model__alpha': np.logspace(-2, 0, 10),
+            'model__l1_ratio': np.linspace(0.001, 1, 10)
         }
 
     else:
@@ -77,17 +84,20 @@ def tune_model(pipeline, param_grid, X_train, y_train):
         y_val_pred = y_pred[val_idx]
         cm = confusion_matrix(y_val_true, y_val_pred)
         print(f'Confusion Matrix - Fold {fold + 1}:\n{cm}\n')
+    print(random_search.best_params_)
     
     return random_search.best_estimator_
 
 def train_ensemble(X_train, y_train, model_names):
 
     tuned_models = []
-    
+
+    i= 0
     for model_name in model_names:
         pipeline, param_grid = create_pipeline_and_params(model_name)
         best_model = tune_model(pipeline, param_grid, X_train, y_train)
-        tuned_models.append((model_name.lower(), best_model))
+        tuned_models.append((model_name.lower() + str(i), best_model))
+        i +=1
     
     ensemble = VotingClassifier(estimators=tuned_models, voting='soft')
     ensemble.fit(X_train, y_train)
