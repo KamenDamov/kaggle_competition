@@ -61,5 +61,3 @@ def train_cnb(X_train, y_train) -> ComplementNB:
     print("Best F1 Score:", random_search.best_score_)
     best_cnb = random_search.best_estimator_
     return best_cnb
-
-

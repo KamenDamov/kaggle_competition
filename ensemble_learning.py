@@ -8,7 +8,7 @@ from sklearn.metrics import f1_score, make_scorer
 import numpy as np
 from sklearn.naive_bayes import ComplementNB
 from xgboost import XGBClassifier
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.svm import SVC
 from scipy.stats import uniform
 from sklearn.metrics import confusion_matrix
@@ -50,13 +50,20 @@ def create_pipeline_and_params(model_name):
 
     elif model_name == 'SVC':
         pipeline = Pipeline([
-            #('tfidf', TfidfTransformer()),
-            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
-            ('model', SVC(probability=True))
+            ('model', SVC(kernel='rbf', probability=True))
         ])
         param_grid = {
-            'model__C': uniform(0.1, 10),
-            'model__kernel': ['linear', 'rbf']
+            'model__C': np.arange(45, 55, 1),
+            'model__gamma': np.arange(0.003, 0.02, 0.001)
+        }
+
+    elif model_name == 'SGD':
+        pipeline = Pipeline([
+            ('model', SGDClassifier(loss='modified_huber', penalty='elasticnet', max_iter=10000))
+        ])
+        param_grid = {
+            'model__alpha': np.logspace(-2, 0, 10),
+            'model__l1_ratio': np.linspace(0.001, 1, 10)
         }
 
     else:
