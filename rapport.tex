@@ -34,17 +34,19 @@ Si nous tentons plutôt de sous-échantilloner, il nous est possible d'utiliser 
 Nous utilisons un arbre de décision avec le critère de Gini pour évaluer l'importance des attributs. Le coefficcient de Gini est calculé ainsi: $\text{Gini} = 1 - \sum_{i=1}^{C} \mathbb{P}[\text{un points choisi aléatoirement appartient à $C_i$}]^2$ avec $C_i \in C$. À chaque division, l’arbre choisit l’attribut qui réduit le plus l'impureté de Gini, indiquant ainsi les attributs les plus discriminants pour la prédiction. En analysant l'importance cumulative de chaque attribut dans l'ensemble de l'arbre, nous extrayons les $k$ attributs les plus importants, ceux-ci étant les plus déterminants pour la prédiction.
 \subsubsection{Réduction à base de fréquences cumulatives}
 Sachant que le jeu de données est très éparse,  nous avons tenter de retirer les mots qui surviennent très rarement à travers le corpus de texte. Nous détectons ces mots en calculant la somme des fréquences d'un mot à travers tout le corpus, en triant le corpus en ordre croissant, et en retirant une proportion des mots du jeu de données en tronquant le vecteurs de fréquences cumulatives, à l'indice qui couvre la proportion voulue du corpus. En somme, nous retirons les mots qui ne sont pas fréquents dans le corpus Voir Annexe pour algorithme plus détaillé. 
-\subsubsection{Réduction en retirant les "stopwords"}
-En langage naturel, certains mots n'apportent pas de sens à une phrase. Ils ne sont présents que pour faire les liaisons et les transitions fluides entre les mots. Ceux-ci se font appeler les "stopwords". En anglais, des exemples de ces mots sont "the", "of", "a", etc. En dessinant le graphique de la fréquence de ces mots, il est possible de remarquer que certains apparaissent très souvents tels que juste qu'à $10 000$ fois à travers les documents. Il apparait alors intéressant de retirer les colonnes de ces mots dans nos jeux d'entrainement et de test. La dimensionnalité diminue alors d'environ ... colonnes.
+\subsubsection{Réduction en retirant les mots vides}
+En langage naturel, certains mots n'apportent pas de sens à une phrase. Ils ne sont présents que pour faire les liaisons et les transitions fluides entre les mots. Ceux-ci se font appeler les mots vides ("stopwords"). En anglais, des exemples de ces mots sont "the", "of", "a", etc. En dessinant le graphique de la fréquence de ces mots, il est possible de remarquer que certains apparaissent très souvents tels que juste qu'à $10 000$ fois à travers les documents. Il apparait alors intéressant de retirer les colonnes de ces mots dans nos jeux d'entrainement et de test. La dimensionnalité diminue alors d'environ ... colonnes.
 \subsubsection{Réduction en combinant les mots similaires}
 Similairement, des librairies telles que nltk offre des méthodes qui transforment les mots vers leur mot commun (lemmatization) ou encore vers leur racine (stemming). Ensuite, toutes les colonnes dont leur mot est le même, il est possible de les combiner ensemble en additionnant leurs fréquences. La dimensionnalité diminue alors d'environ ... colonnes.
 \subsection{Transformation TF-IDF}
 Afin de mesurer l'importance d'un mot selon sa fréquence à travers les documents, il est possible de le transformer avec TF-IDF. La formule est la suivante :
-\[m_{x,y} = tf_{x,y} * log(\frac{n}{1 + df_x})\]
+\[m_{x,y} = {tf}_{x,y} * log(\frac{n}{1 + df_x})\]
 où $tf_{x,y}$ est la fréquence du mot x dans le document y, $n$ est le nombre de documents et $df_x$ est le nombre de documents dans lesquels le mot x apparait.\\
 Ainsi, les mots apparaissant souvent à travers tous les documents auront un moins gros poids ce qui devrait faire diminuer leur bruit.
 
-\section{Premier jalon}
+\section{Algorithmes utilisés}
+Nous avons effectué multiples expériences avec multiples algorithmes d'apprentissage différents. Les algorithmes qui ont été les plus efficaces sont ceux présentés ci-après.
+
 Pour l'implémentation du premier jalon, nous avons choisi d'implémenter un classifieur de Bayes Naif. Pour ce premier jalon, nous n'avons apporté de prétrairement aux données. Nous nous sommes uniquement concentré sur l'implementation du modèle, et de la validation croisée de celui-ci.
 
 \subsection{Classifieur de Bayes Naif}
@@ -58,48 +60,47 @@ $$\argmax_{C_i \in C, x_i \in X} \quad P[C_i | X = x_i] = \argmax_{C_i \in C, x_
 De façon équivalente, nous pouvons écrire le critère en fonction de la vraisemblance (le numérateur de l'expression ci-haut), car maximiser la probabilité, est équivalent à maximiser la vraisemblance, qui est aussi équivalent à maximiser la log vraisemblance, car les deux sont des fonctions croissantes. Voici le critère réécrit en fonction de la log vraisemblance:
 $$\argmax_{C_i \in C, x_i \in X} \log{\prod_{j = 1}^{d}\mathbb{P}[X = x_{i,j}| C]\mathbb{P}[C]} = \argmax_{C_i \in C, x_i \in X} \sum_{j = 1}^{d} \log{\mathbb{P}[X = x_{i,j}| C]} + \log{\mathbb{P}[C]}$$
 En pratique, il est important de voir que toutes les probabilités dans les expressions ci-haut sont calculables par le biais de fréquences observées dans le jeu de données d'entraînement. $\mathbb{P}[C]$ est la probabilité à priori d'être dans la classe 0 ou 1, donc $\mathbb{P}[C] = \frac{\text{Nombre d'observations dans la classe $i$}}{\text{Nombre d'observations dans $X_{train}$}}$. Similairement, $\mathbb{P}[X = x_{i, j}| C]$ est la probabilité que $x_{i, j}$, sachant la classe $C$, qui représente $\mathbb{P}[X = x_{i, j}| C] = \frac{\text{Nombre de $j$ dans la classe $C_i$}}{\text{Nombre total de mots dans la classe $C_i$}}$. Cela dit, il est important de noter qu'il faut lisser cette probabilité afin d'éviter d'annuler la vraisemblance qui se produit lorsque $\mathbb{P}[X = x_{i, j}| C] = 0$, qui survient lorsque un mot $j$ ne se trouve pas dans la classe $C_i$. Posons $\alpha \in \mathbb{R}^{+}$ et $\alpha > 0$ l'hyperparamètre de lissage. Nous calculons dorénavant la vraisemblance, $$\mathbb{P}[X = x_{i, j}| C] = \frac{\text{Nombre de $j$ dans la classe $C_i$ + $\alpha$}}{\text{Nombre total de mots dans la classe $C_i$ + $\alpha \times$ nombre de mots dans le vocabulaire}}$$. Une grande valeur pour $\alpha$ applique un fort lissage sur toute les probabilités, alors qu'une faible valeur de $\alpha$ produit un lissage plus dur. Nous pouvons trouver le $\alpha$ optimal par validation croisée. 
+
 \subsection{Validation croisée}
 Nous implémentons une validation croisée (k-fold cross validation) avec $k = 7$ pour trouver l'hyperparamètre $\alpha$ optimal. Nous avons établi un espace hyperparamétrique de valeur espacée uniformément, allant de $0.4$ à $1.05$ avec des sauts de $0.05$. Du au fait que l'espace est relativement restreint, cet espace est visité séquentiellement par une recherche en grille (grid-search). 
-
-
-\section{Algorithmes d'apprentissage utilisés}
-Nous avons effectué multiples expériences avec multiples algorithmes d'apprentissage différents. Les algorithmes qui ont été les plus efficaces sont ceux présentés ci-après.
 
 \subsection{Classifieur Complément de Bayes naïf}
 Contrairement au classifieur Naïve Bayes décrit précédemment, le Classifieur Complément de Bayes calcule les statistiques des caractéristiques (comme les fréquences des mots) en fonction des classes autres que celle que l’on cherche à prédire. C'est pour cela qu'on parle de "complément" : pour chaque classe c, on prend en compte les informations des classes complémentaires, ce qui permet de compenser les erreurs d’estimation dans les classes minoritaires. Cette approche tend à réduire l’impact des caractéristiques qui sont très spécifiques à certaines classes et qui pourraient biaiser le modèle.
 
 \subsection{Classifieur XGBoost}
-Nous avons également exploré l’application d’un modèle basé sur des arbres au problème. Cet algorithme crée une série d'arbres de décision, chaque arbre subséquent étant formé pour corriger les erreurs des arbres précédents, en utilisant les gradients et Hessians de l’erreur pour orienter ses subdivisions. Contrairement au vote majoritaire utilisé dans des méthodes comme la forêt aléatoire, XGBoost produit une prédiction finale en sommant les prédictions pondérées de chaque arbre. Comme pour le critère de Gini mentionné plus haut, XGBoost utilise un critère de gain de subdivision pour déterminer les branchements de chaque arbre de décision. Ce gain de subdivision est défini par la formule suivante : 
-$$\text{Gain} = \frac{1}{2} \left( \frac{(\sum \text{gradients}_{\text{gauche}})^2}{\sum \text{Hessians}_{\text{gauche}} + \lambda} + \frac{(\sum \text{gradients}_{\text{droite}})^2}{\sum \text{Hessians}_{\text{droite}} + \lambda} - \frac{(\sum \text{gradients}_{\text{total}})^2}{\sum \text{Hessians}_{\text{total}} + \lambda} \right) - \gamma$$
-Avec $\sum \text{gradients}$ étant la somme des gradients pour le sous-ensmeble à gauche ou droite de la subdivision, 
-Avec $\sum \text{gradients}_{\text{total}}$ somme des gradients pour l’ensemble complet avant la subdivision. $\sum \text{Hessians}$ est la somme des Hessiens (dérivées secondes). Notons que les gardients et Hessiens sont calculés à partir de la perte d'entropie croisée: $$\text{Log Loss} = -\frac{1}{N} \sum_{i=1}^{N} \left( y_i \cdot \log(\hat{y}_i) + (1 - y_i) \cdot \log(1 - \hat{y}_i) \right)$$
-Avec respectivement la dérivée première pour le gradient et seconde pour l'Hessien.
-$$\frac{\partial \text{Log Loss}}{\partial \hat{y}_i} = \frac{\hat{y}_i - y_i}{\hat{y}_i (1 - \hat{y}_i)}$$
-$$\frac{\partial^2 \text{Log Loss}}{\partial \hat{y}_i^2} = \frac{1 - y_i}{\hat{y}_i^2} + \frac{y_i}{(1 - \hat{y}_i)^2}
-$$
-Avec  $\hat{y}_i$ est la classe prédite et $y_i$ est la vraie classe.
+Nous avons également exploré l’application d’un modèle basé sur des arbres au problème. Cet algorithme crée une série d'arbres de décision, chaque arbre subséquent étant formé pour corriger les erreurs des arbres précédents, en utilisant les gradients et Hessians de l’erreur pour orienter ses subdivisions. Contrairement au vote majoritaire utilisé dans des méthodes comme la forêt aléatoire, XGBoost produit une prédiction finale en sommant les prédictions pondérées de chaque arbre. Comme pour le critère de Gini mentionné plus haut, XGBoost utilise un critère de gain de subdivision pour déterminer les branchements de chaque arbre de décision. 
+% Ce gain de subdivision est défini par la formule suivante : 
+% $$\text{Gain} = \frac{1}{2} \left( \frac{(\sum \text{gradients}_{\text{gauche}})^2}{\sum \text{Hessians}_{\text{gauche}} + \lambda} + \frac{(\sum \text{gradients}_{\text{droite}})^2}{\sum \text{Hessians}_{\text{droite}} + \lambda} - \frac{(\sum \text{gradients}_{\text{total}})^2}{\sum \text{Hessians}_{\text{total}} + \lambda} \right) - \gamma$$
+% Avec $\sum \text{gradients}$ étant la somme des gradients pour le sous-ensmeble à gauche ou droite de la subdivision, 
+% Avec $\sum \text{gradients}_{\text{total}}$ somme des gradients pour l’ensemble complet avant la subdivision. $\sum \text{Hessians}$ est la somme des Hessiens (dérivées secondes). Notons que les gardients et Hessiens sont calculés à partir de la perte d'entropie croisée: $$\text{Log Loss} = -\frac{1}{N} \sum_{i=1}^{N} \left( y_i \cdot \log(\hat{y}_i) + (1 - y_i) \cdot \log(1 - \hat{y}_i) \right)$$
+% Avec respectivement la dérivée première pour le gradient et seconde pour l'Hessien.
+% $$\frac{\partial \text{Log Loss}}{\partial \hat{y}_i} = \frac{\hat{y}_i - y_i}{\hat{y}_i (1 - \hat{y}_i)}$$
+% $$\frac{\partial^2 \text{Log Loss}}{\partial \hat{y}_i^2} = \frac{1 - y_i}{\hat{y}_i^2} + \frac{y_i}{(1 - \hat{y}_i)^2}
+% $$
+% Avec  $\hat{y}_i$ est la classe prédite et $y_i$ est la vraie classe.
 XGBoost utilise ainsi la somme des gradients et des Hessians pour guider la construction de chaque arbre, en choisissant les divisions qui maximisent le gain de subdivision pour minimiser l’erreur totale.
 
 \subsection{Classifieur perte de Huber modifié avec descente de gradient stochastique (SGD)}
-Le Classifieur SGD (Stochastic Gradient Descent) avec la perte Modified Huber est une méthode de classification linéaire qui utilise la descente de gradient stochastique pour minimiser une fonction de coût basée sur la distance entre les prédictions et les étiquettes cibles. La fonction de perte Modified Huber est une variante de la perte Hinge, utilisée dans les SVMs, mais avec une modification qui la rend lisse et plus tolérante aux valeurs aberrantes (outliers). L'algorithme SGD utilise un échantillonnage aléatoire des données pour mettre à jour les paramètres du SVM à chaque itération, au lieu d'utiliser l’ensemble des données d'apprentissage, ce qui le rend rapide et efficace, même pour des jeux de données volumineux.
+Le Classifieur SGD (Stochastic Gradient Descent) avec la perte Modified Huber est une méthode de classification linéaire qui utilise la descente de gradient stochastique pour minimiser une fonction de coût basée sur la distance entre les prédictions et les étiquettes cibles. La fonction de perte Huber modifiée est une variante de la perte Hinge, utilisée dans les SVMs, mais avec une modification qui la rend lisse et plus tolérante aux valeurs aberrantes (outliers). L'algorithme SGD utilise un échantillonnage aléatoire des données pour mettre à jour les paramètres du SVM à chaque itération, au lieu d'utiliser l’ensemble des données d'apprentissage, ce qui le rend rapide et efficace, même pour des jeux de données volumineux.
 
-\subsubsection{Classifieur SVM (SVC)}
+\subsection{Classifieur SVM (SVC)}
 Le principe d'un SVM est de trouver un hyperplan qui sépare les données de différentes classes avec la plus grande marge possible, c'est-à-dire la distance maximale entre les points de chaque classe les plus proches de l'hyperplan. Une fois l'hyperplan trouvé, le SVM classe un nouvel exemple en fonction de son côté par rapport à l'hyperplan : si le point est d’un côté, il appartient à la classe positive, sinon il appartient à la classe négative.
 
 \subsection{Classifieur d'apprentissage par ensembles}
-Nous avons tenter combiner plusieurs modèles de nature différentes et aggréger leurs prédictions dans le but d'augmenter la performance sur le score F1. Cette procédure consiste à entraîner indépendamment des classificateurs et procéder à un vote lisse en extrayant et aggrégeant les probabilités de classification de chaque modèle dans l'ensemble. Dans notre cas, nous avons entraîner un classifieur complémentaire de Bayes (une modèle fréquentiste), un classifieur XGBoost (modèle à base d'arbres de décision), et une régression logistique (classifieur linéaire). Il est important de noter que nous avons choisi ces modèles pour avoir une frontière de décision de nature différente, et avoir des estimations plus robustes, qui ne sont pas biaisées par la similarité de la frontière de décision apprise entre les modèles. Voir algorithme 1 dans l'annexe, pour une description plus rigoureuse de la méthode.
+Nous avons tenter de combiner plusieurs modèles de nature différentes et d'aggréger leurs prédictions dans le but d'augmenter la performance sur le score F1. Cette procédure consiste à entraîner indépendamment des classifieurs et procéder à un vote lisse en extrayant et aggrégeant les probabilités de classification de chaque modèle dans l'ensemble. Dans notre cas, nous avons entraîner un classifieur complémentaire de Bayes (modèle fréquentiste), un classifieur XGBoost (modèle à base d'arbres de décision), et un classifieur SVM sous perte Huber modifiée à descente de gradient stochastique (modèle linéaire). Il est important de noter que nous avons choisi ces modèles pour avoir une frontière de décision de nature différente, et avoir des estimations plus robustes, qui ne sont pas biaisées par la similarité de la frontière de décision apprise entre les modèles. Voir algorithme 1 dans l'annexe, pour une description plus rigoureuse de la méthode.
 
-\subsection{Autres}
-Ces prochains algorithmes de classification ont aussi été essayés sans que leurs résultats soient assez concluants.
-\subsubsection{Classifieur par régression logistique}
-La régression logistique utilise une fonction sigmoïde pour transformer la sortie linéaire en une probabilité comprise entre 0 et 1, ce qui permet de modéliser la probabilité d'appartenance à une classe. Le modèle cherche à optimiser les coefficients associés à chaque caractéristique pour minimiser la différence entre les prédictions et les étiquettes réelles. Si la probabilité est assez haute d'être dans une classe, cette classe lui est attribuée.
+\subsection{Classifieur par régression logistique}
+La régression logistique utilise une fonction sigmoïde pour transformer la sortie linéaire en une probabilité comprise entre 0 et 1, ce qui permet de modéliser la probabilité d'appartenance à une classe. Le modèle cherche à optimiser les coefficients associés à chaque caractéristique pour minimiser la différence entre les prédictions et les étiquettes réelles. Si la probabilité est assez haute d'être dans une classe, cette classe lui est attribuée. Cette méthode a été moins concluante que les autres, alors elle n'est pas été inclue dans le classifieur par ensembles.
+
 \section{Méthodologie}
 \subsection{Répartition pour l'entrainement et la validation}
-Pour tout les algorithmes et prétraitement choisis, nous avons appliquer une validation croisée k-fold avec $k = 5$ stratfiées. La stratification dans la séparation des données en ensemble d'entraînement et de validation est cruciale car nous avons un jeu de données débalancés (malgré le rebalancement mentionné plus haut). Ainsi, nous avons une représentation proportionelle des étiquettes de la classe $0$ et $1$ dans la l'ensemble d'entraînement et de validation. 
+Pour tout les algorithmes et prétraitement choisis, nous avons appliqué une validation croisée k-fold avec $k = 5$ stratifiées. La stratification dans la séparation des données en ensemble d'entraînement et de validation est cruciale, car nous avons un jeu de données débalancés (malgré le rebalancement mentionné plus haut). Ainsi, nous avons une représentation proportionelle des étiquettes de la classe $0$ et $1$ dans l'ensemble d'entraînement et de validation.
+
 \subsection{Ajustement des hyperparamètres}
-Nous utilisons la procédure de recherche aléatoire pour trouver la meilleure combinaison d'hyperparamètres. La meilleure combinaison d'hyperparamètres est choisies en moyennant le score F1 pour chaque combinaison d'hyperparamètres Nous priorisons cette procédure plutôt qu'une recherche en grille par soucis computationnel. 
+Nous utilisons la procédure de recherche aléatoire pour trouver la meilleure combinaison d'hyperparamètres. Celle-ci est choisie en prenant la combinaison ayant la meilleure moyenne du score F1. Nous priorisons cette procédure plutôt qu'une recherche en grille par soucis computationnel. 
+
 \subsection{Astuces d'optimisation}
-Nous avons opté pour une recherche aléatoire plutôt qu'une recherche en grille qui est plus chronophage pour un résultat comparable \cite{bergstra2012random}. 
+Nous avons opté pour une recherche aléatoire plutôt qu'une recherche en grille qui est plus chronophage pour un résultat comparable \cite{bergstra2012random}. Une autre optimisation a été de convertir les données de train et de test en int8. Ceci a permis de contourner plusieurs erreurs de mémoire et a permis d'accélérer le temps computationnel tout en conservant l'étendu de toutes les valeurs présentes dans les jeux de données. En effet, la fréquence maximale dans les matrices est de 38 ce qui est inférieure à $2^8=256$. Cependant, l'algorithme du SVC est une exception, car il a besoin d'avoir les données encodées en float32 ou float64 afin de faire ses calculs. Nous avons donc simplement rechanger les types.
 
 \section{Résultats}
 \subsection{Étape 1}
@@ -107,8 +108,14 @@ Nous avons opté pour une recherche aléatoire plutôt qu'une recherche en grill
 
 \section{Discussion}
 \subsection{Avantages et inconvénients}
-\subsection{Améliorations futures}
+Un inconvénient de notre méthodologie a été que nous nous sommes lancés sur trop de modèles différents, alors qu'il aurait été plus efficace de se concentrer sur une poignée tels que seulement ceux décrits dans le rapport. La même méthodologie aurait dû être appliquée pour identifier clairement quelles méthodes de prétraitement étaient les meilleures.
 
+Un avantage de notre méthodologie est la robustesse du classifieur par ensemble, car ils ont une plus petite variance que les modèles individuels. Un autre avantage est le travail sur la visualisation des données qui a permis une meilleure compréhension du matériel. Un dernier avantage est la structure du code en orienté objet qui a permis une plus grande facilité à adapter le code rapidement pour tester différentes méthodes de prétraitement (ce qui en a constitué un inconvénient aussi).
+
+\subsection{Améliorations futures}
+Une amélioration future à nos résultats serait de faire rouler notre modèle d'apprentissage par ensemble sur plus d'itérations. En effet, celui-ci semble pouvoir converger vers un meilleure score F1 plus il y a d'itérations. Une autre amélioration possible serait d'identifier plus rigoureusement et exhaustivement quelles méthodes de prétraitement des données sont les plus efficaces au lieu de trop s'éparpiller sur plusieurs différentes.
+
+\newpage
 \section{Références}
 \begin{enumerate}
     \item \label{bergstra2012random} Bergstra, J., \& Bengio, Y. (2012). Random search for hyper-parameter optimization. \textit{The Journal of Machine Learning Research, 13}, 281–305.
