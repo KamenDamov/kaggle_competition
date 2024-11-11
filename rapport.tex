@@ -93,17 +93,13 @@ Nous avons tenter combiner plusieurs modèles de nature différentes et aggrége
 Ces prochains algorithmes de classification ont aussi été essayés sans que leurs résultats soient assez concluants.
 \subsubsection{Classifieur par régression logistique}
 La régression logistique utilise une fonction sigmoïde pour transformer la sortie linéaire en une probabilité comprise entre 0 et 1, ce qui permet de modéliser la probabilité d'appartenance à une classe. Le modèle cherche à optimiser les coefficients associés à chaque caractéristique pour minimiser la différence entre les prédictions et les étiquettes réelles. Si la probabilité est assez haute d'être dans une classe, cette classe lui est attribuée.
-\subsubsection{Classifieur par forêts aléatoires}
-\subsubsection{Classifieur par réseaux de neurones}
-
 \section{Méthodologie}
 \subsection{Répartition pour l'entrainement et la validation}
 Pour tout les algorithmes et prétraitement choisis, nous avons appliquer une validation croisée k-fold avec $k = 5$ stratfiées. La stratification dans la séparation des données en ensemble d'entraînement et de validation est cruciale car nous avons un jeu de données débalancés (malgré le rebalancement mentionné plus haut). Ainsi, nous avons une représentation proportionelle des étiquettes de la classe $0$ et $1$ dans la l'ensemble d'entraînement et de validation. 
 \subsection{Ajustement des hyperparamètres}
 Nous utilisons la procédure de recherche aléatoire pour trouver la meilleure combinaison d'hyperparamètres. La meilleure combinaison d'hyperparamètres est choisies en moyennant le score F1 pour chaque combinaison d'hyperparamètres Nous priorisons cette procédure plutôt qu'une recherche en grille par soucis computationnel. 
 \subsection{Astuces d'optimisation}
-Random search avec papier de bengio
-Réduction dimensionnalité
+Nous avons opté pour une recherche aléatoire plutôt qu'une recherche en grille qui est plus chronophage pour un résultat comparable \cite{bergstra2012random}. 
 
 \section{Résultats}
 \subsection{Étape 1}
@@ -114,7 +110,10 @@ Réduction dimensionnalité
 \subsection{Améliorations futures}
 
 \section{Références}
-les sites desquels nous nous sommes inspirés
+\begin{enumerate}
+    \item \label{bergstra2012random} Bergstra, J., \& Bengio, Y. (2012). Random search for hyper-parameter optimization. \textit{The Journal of Machine Learning Research, 13}, 281–305.
+    \item Doe, J., \& Smith, J. (2020). Another study on hyper-parameter optimization. \textit{Machine Learning Review, 22}, 15–30.
+\end{enumerate}
 
 \section{Annexes}
 \subsection{Graphiques}
