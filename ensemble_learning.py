@@ -1,9 +1,6 @@
 from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 from sklearn.ensemble import VotingClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.preprocessing import FunctionTransformer
-from scipy.sparse import csr_matrix
 from sklearn.metrics import f1_score, make_scorer
 import numpy as np
 from sklearn.naive_bayes import ComplementNB
@@ -21,16 +18,12 @@ def create_pipeline_and_params(model_name):
     # TFIDF génèrent de moins bonnes perfo sur validation
     if model_name == 'ComplementNB':
         pipeline = Pipeline([
-            #('tfidf', TfidfTransformer()),
-            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
             ('model', ComplementNB())
         ])
         param_grid = {'model__alpha': uniform(0.001, 0.7)}
     
     elif model_name == 'XGBoost':
         pipeline = Pipeline([
-            #('tfidf', TfidfTransformer()),
-            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
             ('model', XGBClassifier(use_label_encoder=False, eval_metric='logloss'))
         ])
         param_grid = {
@@ -42,8 +35,6 @@ def create_pipeline_and_params(model_name):
     
     elif model_name == 'LogisticRegression':
         pipeline = Pipeline([
-            #('tfidf', TfidfTransformer()),
-            #('to_float32', FunctionTransformer(lambda X: csr_matrix(X, dtype=np.float32))),
             ('model', LogisticRegression(max_iter=1000))
         ])
         param_grid = {'model__C': uniform(0.1, 10), 'model__penalty': ['l1'], 'model__solver': ['liblinear']}
