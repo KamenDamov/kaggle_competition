@@ -1,5 +1,5 @@
 import numpy as np
-from preprocess_data import DataPreprocess, random_undersampling, remove_cum_sum
+from preprocess_data import DataPreprocess, random_undersampling, get_indices_to_remove_cum_sum
 import visualize_data
 from ensemble_learning import train_ensemble, estimate
 from complement_naive_bayes import train_cnb_with_tfidf

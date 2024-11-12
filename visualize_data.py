@@ -6,7 +6,7 @@ from collections import Counter
 import seaborn as sns
 from sklearn.metrics.pairwise import cosine_similarity
 
-from preprocess_data import DataPreprocess, remove_cum_sum
+from preprocess_data import DataPreprocess, get_indices_to_remove_cum_sum
 
 
 def print_stats(title, data):
@@ -115,7 +115,7 @@ def check_sparsity_decrease(data: np.array):
     thresholds = np.linspace(0.1, 1, 10)
     sparsity_perc = []
     for tresh in thresholds: 
-        reduced_data_indeces = remove_cum_sum(data, tresh)
+        reduced_data_indeces = get_indices_to_remove_cum_sum(data, tresh)
         reduced_data = np.delete(data, reduced_data_indeces, axis=1)
         sparsity_perc.append(np.nonzero(reduced_data)[0].shape[0] / reduced_data.size)
 

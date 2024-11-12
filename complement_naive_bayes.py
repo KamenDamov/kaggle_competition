@@ -24,7 +24,7 @@ def train_cnb_with_tfidf(X_train, y_train) -> ComplementNB:
 
     random_search = RandomizedSearchCV(
         pipeline, param_distributions, scoring=scorer, cv=2, n_jobs=1, 
-        verbose=3, n_iter=1, random_state=42
+        verbose=3, n_iter=50, random_state=42
     )
 
     random_search.fit(X_train, y_train)

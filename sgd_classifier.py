@@ -19,7 +19,7 @@ def train_sgd(X_train, y_train):
 
     random_search = random_search = RandomizedSearchCV(
         pipeline, param_distributions=param_grid, scoring=scorer, cv=cv,
-        n_iter=1, n_jobs=1, random_state=0, verbose=3
+        n_iter=15, n_jobs=1, random_state=0, verbose=3
     )
 
     random_search.fit(X_train, y_train)

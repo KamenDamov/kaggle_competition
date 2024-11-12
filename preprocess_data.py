@@ -79,7 +79,8 @@ def combine_columns(X, unique_words, word_mapping):
             new_X[:, unique_words.index(stem)] += X[:, idx]
 
     return new_X
-def remove_cum_sum(all_data: np.array, threshold: float) -> np.array:
+
+def get_indices_to_remove_cum_sum(all_data: np.array, threshold: float) -> np.array:
     feature_sums = np.sum(all_data, axis=0)
     sorted_indices = np.argsort(feature_sums)[::-1]
     sorted_sums = feature_sums[sorted_indices]
@@ -107,8 +108,8 @@ class DataPreprocess:
             lines = file.readlines()[1:]
         self.label_train = np.array([int(label.split(",")[-1].strip()) for label in lines])
 
-        self.train = np.array(self.train, dtype=np.int8)
-        self.test = np.array(self.test, dtype=np.int8)
+        self.train = np.array(self.train, dtype=np.float32)
+        self.test = np.array(self.test, dtype=np.float32)
 
 
     def initialize_tfidf(self):
@@ -118,6 +119,11 @@ class DataPreprocess:
     def remove_min_max(self, min, max):
         # min or max can be absolute value or % value
         pass
+
+    def remove_cum_sum(self):
+        indices_to_remove = get_indices_to_remove_cum_sum(self.train, 0.95)
+        self.train = np.delete(self.train, indices_to_remove, axis=1)
+        self.test = np.delete(self.test, indices_to_remove, axis=1)
 
     def remove_stopwords(self):
         # TODO: use list instead of opening document

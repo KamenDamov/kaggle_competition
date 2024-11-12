@@ -2,7 +2,7 @@ import csv
 import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVC
+from cuml.svm import SVC
 from sklearn.metrics import f1_score
 from preprocess_data import DataPreprocess
 from save_output import save_output
