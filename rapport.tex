@@ -97,27 +97,27 @@ Pour le modèle bayésien du premier jalon, nous avions uniquement un hyperparam
 Nous avons opté pour une recherche aléatoire plutôt qu'une recherche en grille qui est plus chronophage pour un résultat comparable \cite{bergstra2012random}. Une autre optimisation a été de convertir les données de train et de test en int8. Ceci a permis de contourner plusieurs erreurs de mémoire et a permis d'accélérer le temps computationnel tout en conservant l'étendu de toutes les valeurs présentes dans les jeux de données. En effet, la fréquence maximale dans les matrices est de 38 ce qui est inférieure à $2^8=256$. Cependant, l'algorithme du SVC est une exception, car il a besoin d'avoir les données encodées en float32 ou float64 afin de faire ses calculs. Nous avons donc simplement rechanger les types.
 
 \section{Résultats}
-Par soucis de présentation, nous renommons le modèle Complément Naive de Bayes CNB, Régression Logistique par LogReg. Les modèles ensemblistes figurent sur la même ligne.
+Par soucis de présentation, nous renommons le modèle Complément Naive de Bayes CNB, XGBoost par XGB, Régression Logistique par LogReg. Les modèles ensemblistes figurent sur la même ligne.
 \begin{table}[H]
     \centering
-    \begin{tabular}{|l|c|c|c|c|c|c|c|}
+    \begin{tabular}{|l|c|c|c|c|c|c|c|c|}
         \hline
         \textbf{Model} & \textbf{SMOTE} & \textbf{Under sampl.} & \textbf{Tree} &
         \textbf{Cum Sum} & \textbf{Stopwords} & \textbf{TF-IDF} &
-        \textbf{F1} \\
+        \textbf{F1 Val} & 
+        \textbf{F1 Test} \\
         \hline
-        Bayes naïf vanille &  &  &  &  &  &  & 0.6019 \\
-        CNB &  &  &  &  &  & x & 0.5581\\
-        CNB &  &  &  &  &  &  & 0.5814\\
-        CNB &  &  & x &  & x & x & 0.5640\\
-        CNB & x &  & x &  & x & x & 0.6450\\
-        CNB &  & x &  & x & x &  & 0.6450\\
-        SVM &  & x &  & x & x &  & 0.6510\\
-        SGD avec Huber modifié &  & x &  & x & x &  & 0.6107\\
-        XGBoost &  & x &  & x & x &  & 0.6457\\
-        CNB, XGBoost, LogReg &  & x &  & x & x &  & 0.6819\\
-        CNB, XGBoost, LogReg &  & x &  &  & x &  & 0.6785\\
-        CNB, XGBoost, SVC, SGD &  & x &  & x & x &  & 0.6895\\
+        Bayes naïf vanille &  &  &  &  &  &  & 0.6019 & 0.7196\\
+        CNB &  &  &  &  &  & x & 0.5581 & 0.7127\\
+        CNB &  &  & x &  & x & x & 0.5640 & 0.6324\\
+        CNB & x &  & x &  & x & x & 0.6450 & 0.6870\\
+        CNB &  & x &  & x & x &  & 0.6450 & N/A\\
+        SVM &  & x &  & x & x &  & 0.6510 & N/A\\
+        SGD avec Huber mod. &  & x &  & x & x &  & 0.6107 & 0.6629\\
+        XGBoost &  & x &  & x & x &  & 0.6457 & 0.6115\\
+        CNB, XGB, LogReg &  & x &  & x & x &  & 0.6819 & 0.7233\\
+        CNB, XGB, LogReg &  & x &  &  & x &  & 0.6785 & 0.7164\\
+        CNB, XGB, SVC, SGD &  & x &  & x & x &  & 0.6895 & 0.7194\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et modèles}
