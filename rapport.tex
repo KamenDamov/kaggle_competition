@@ -123,7 +123,7 @@ Par soucis de présentation, nous renommons le modèle Complément Naive de Baye
     \caption{Comparaison entre prétraitement et modèles}
     \label{tab:model_comparison}
 \end{table}
-En analysant le score F1, on peut voir une augmentation à première vue significative des méthodes d'apprentissages par ensemble contrairement aux performances de modèles uniques. Étant donné l'entraînement indépendants, de chaque modèle, les valeurs des hyperparamètres dans les ensembles de modèles, sont les mêmes que les hyperparamètres optimaux trouvés dans les modèles individuels. Les modèles de bayésiens priorisent souvent des valeurs prochent de $\alpha = 1$, alors que les modèles modèles à base d'arbres, priorisent plus d'estimateurs, et que ceux-ci soient plus profonds. Pour ce qui est des modèles linéaires (SGD, SVC, régression logistique), on peut observer un biais systématique pour un plus gros poids des termes de régularisation. Voir l'annexe pour des détails sur les valeurs exactes des hyperparamètres en lien avec la performance des modèles
+En analysant le score F1, on peut voir une augmentation à première vue significative des méthodes d'apprentissages par ensemble contrairement aux performances de modèles uniques. Étant donné l'entraînement indépendants, de chaque modèle, les valeurs des hyperparamètres dans les ensembles de modèles, sont les mêmes que les hyperparamètres optimaux trouvés dans les modèles individuels. Les modèles de bayésiens priorisent souvent des valeurs prochent de $\alpha = 1$, alors que les modèles à base d'arbres, priorisent plus d'estimateurs, et que ceux-ci soient plus profonds. Pour ce qui est des modèles linéaires (SGD, SVC, régression logistique), on peut observer un biais systématique pour un plus gros poids des termes de régularisations qui témoigne d'une préférence pour pour les modèles plus simples. Voir l'annexe pour des détails sur les valeurs exactes des hyperparamètres en lien avec la performance des modèles
 \section{Discussion}
 Parler de pourquoi pas PCA, truncated-SVD ou autre?
 \subsection{Avantages et inconvénients}
@@ -132,7 +132,7 @@ Un inconvénient de notre méthodologie a été que nous nous sommes lancés sur
 Un avantage de notre méthodologie est la robustesse du classifieur par ensemble, car ils ont une plus petite variance que les modèles individuels. Un autre avantage est le travail sur la visualisation des données qui a permis une meilleure compréhension du matériel. Un dernier avantage est la structure du code en orienté objet qui a permis une plus grande facilité à adapter le code rapidement pour tester différentes méthodes de prétraitement (ce qui en a constitué un inconvénient aussi).
 
 \subsection{Améliorations futures}
-Une amélioration future à nos résultats serait de faire rouler notre modèle d'apprentissage par ensemble sur plus d'itérations. En effet, celui-ci semble pouvoir converger vers un meilleure score F1 plus il y a d'itérations. Une autre amélioration possible serait d'identifier plus rigoureusement et exhaustivement quelles méthodes de prétraitement des données sont les plus efficaces au lieu de trop s'éparpiller sur plusieurs différentes.
+Une amélioration future à nos résultats serait de faire rouler notre modèle d'apprentissage par ensemble sur plus d'itérations de recherches d'hyperparamètres. En effet, celui-ci semble pouvoir converger vers un meilleure score F1 plus il y a d'itérations. Une autre amélioration possible serait d'identifier plus rigoureusement et exhaustivement quelles méthodes de prétraitement des données sont les plus efficaces au lieu de trop s'éparpiller sur plusieurs différentes.
 
 \newpage
 \section{Références}
@@ -144,7 +144,7 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
 \end{enumerate}
 
 \section{Annexes}
-\subsection{Graphiques}
+\subsection{Graphiques et Tables}
 \begin{table}[H]
     \centering
     \begin{tabular}{|l|c|c|}
