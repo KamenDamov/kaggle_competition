@@ -8,7 +8,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import networkx as nx
 from collections import Counter
 
-from preprocess_data import DataPreprocess
+from preprocess_data import DataPreprocess, random_undersampling
 
 
 def plot_grid_search(cv_results, grid_param_1, grid_param_2, name_param_1, name_param_2):
@@ -44,14 +44,14 @@ def print_stats(title, data):
 
 
 # Longueur par document
-def length_of_docs(dataset_1, dataset_0, dataset):
+def length_of_docs(dataset_1, dataset_0, dataset, title):
   data_1 = dataset_1.sum(axis=1)
   data_0 = dataset_0.sum(axis=1)
   data = dataset.sum(axis=1)
   plt.hist(data_1, color="#00FF0040")  # range pour éviter les valeurs aberrantes
   plt.hist(data_0, color="#FF000040")
   plt.hist(data, color="#0000FF40")
-  plt.title("Fréquence de la longueur des documents")
+  plt.title(title)
   plt.xlabel("Longueur")
   plt.ylabel("Fréquence")
   plt.grid(False)
@@ -101,7 +101,7 @@ def mean_length_of_words(dataset_similaire, dataset_assimilaire, dataset):
     # print_stats("global", data)
 
 # Top 10 mots les plus fréquents
-def most_frequent_words(dataset, vocab_map, name):
+def most_frequent_words(dataset, vocab_map, title):
     # TODO: mots les plus frequents par doc
     data = dataset.sum(axis=0)
     top_idx = np.argsort(data)[-10:][::-1]
@@ -110,7 +110,7 @@ def most_frequent_words(dataset, vocab_map, name):
         x.append(vocab_map[idx])
         y.append(data[idx])
     sns.barplot(x=y,y=x)
-    plt.title(name + ": Top 10 mots les plus fréquents")
+    plt.title(title)
     plt.xlabel("Fréquence")
     plt.ylabel("Mot")
     plt.show()
@@ -327,7 +327,7 @@ def plot_zipfs_law(train, label_train, title):
     plt.legend(["Tous docs", "Label 0", "Label 1"])
     plt.show()
 
-def get_graphs(vocab_map, dataset, labels):
+def get_graphs(vocab_map, dataset, labels, transformation):
     # Créer un dataset pour les labels 1 et les labels 0
     dataset_1, dataset_0 = [], []
     n = len(dataset) // 2
@@ -342,6 +342,11 @@ def get_graphs(vocab_map, dataset, labels):
                 dataset_0.append(dataset[i])
                 dataset_0.append(dataset[i + n])
     dataset_1, dataset_0 = np.array(dataset_1), np.array(dataset_0)
+
+    length_of_docs(dataset_1, dataset_0, dataset, "Documents frequency with " + transformation)
+    most_frequent_words(dataset, vocab_map, "Top 10 most frequent words with " + transformation)
+    plot_cumulative_word_distribution(dataset, labels, "Cumulative Word Frequency Distribution with " + transformation)
+    plot_full_word_frequency_distribution(dataset, labels, "Overall Word Frequency Distribution with " + transformation)
 
 
 # def main():
@@ -376,19 +381,36 @@ def main():
     data_preprocess = DataPreprocess()
     vocab_map = data_preprocess.vocab_map
     print("data processed!")
-    # data_preprocess.apply_truncated_svd(3)
-    # visualize_3d_svd(data_preprocess.train, data_preprocess.test)
-    # print("3d visualization completed!")
     get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
     print("graphs generated!")
+
     print("removing stopwords...")
     data_preprocess.remove_stopwords()
     print("stopwords removed!")
     print("generating graphs...")
     get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
     print("graphs generated!")
+
+    print("processing new data...")
+    data_preprocess = DataPreprocess()
+    print("new data processed!")
+    print("removing by cumulative sum...")
+    data_preprocess.remove_cum_sum()
+    vocab_map = data_preprocess.vocab_map
+    print("removed by cumulative sum!")
     print("generating graphs...")
-    get_graphs(vocab_map, data_preprocess.train_tfidf, data_preprocess.label_train)
+    get_graphs(vocab_map, data_preprocess.train, data_preprocess.label_train)
+    print("graphs generated!")
+
+    print("processing new data...")
+    data_preprocess = DataPreprocess()
+    print("new data processed!")
+    print("removing by undersampled...")
+    X_train_undersampled, y_train_undersampled = random_undersampling(data_preprocess.train, data_preprocess.label_train)
+    vocab_map = data_preprocess.vocab_map
+    print("removed by undersampled!")
+    print("generating graphs...")
+    get_graphs(vocab_map, X_train_undersampled, y_train_undersampled)
     print("graphs generated!")
 
 def main_2():
@@ -450,4 +472,3 @@ def main_2():
 
 if __name__ == "__main__":
     main()
-    main_2()

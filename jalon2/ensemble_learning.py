@@ -1,17 +1,18 @@
+from numpy.f2py.crackfortran import verbose
 from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 from sklearn.ensemble import VotingClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import f1_score, make_scorer
 import numpy as np
-from sklearn.naive_bayes import ComplementNB
+from cuml.naive_bayes import ComplementNB
 from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
-from sklearn.svm import SVC
+from cuml.svm import SVC
 from scipy.stats import uniform
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_predict
 
-cv = StratifiedKFold(n_splits=2, shuffle=True, random_state=42)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scorer = make_scorer(f1_score)
 
 def create_pipeline_and_params(model_name):
@@ -24,7 +25,7 @@ def create_pipeline_and_params(model_name):
     
     elif model_name == 'XGBoost':
         pipeline = Pipeline([
-            ('model', XGBClassifier(use_label_encoder=False, eval_metric='logloss'))
+            ('model', XGBClassifier(eval_metric='logloss'))
         ])
         param_grid = {
             'model__learning_rate': uniform(0.01, 0.2),         # Learning rate for the model
@@ -65,7 +66,7 @@ def create_pipeline_and_params(model_name):
 def tune_model(pipeline, param_grid, X_train, y_train):
     random_search = RandomizedSearchCV(
         pipeline, param_distributions=param_grid, scoring=scorer, cv=cv,
-        n_iter=1, n_jobs=1, random_state=0, verbose=3
+        n_iter=10, n_jobs=1, random_state=0, verbose=3
     )
     random_search.fit(X_train, y_train)
     print(f"Best F1 for {pipeline.named_steps['model'].__class__.__name__}:", random_search.best_score_)
@@ -74,7 +75,7 @@ def tune_model(pipeline, param_grid, X_train, y_train):
         y_val_true = y_train[val_idx]
         y_val_pred = y_pred[val_idx]
         cm = confusion_matrix(y_val_true, y_val_pred)
-        print(f'Confusion Matrix - Fold {fold + 1}:\n{cm}\n')
+        # print(f'Confusion Matrix - Fold {fold + 1}:\n{cm}\n')
     
     return random_search.best_estimator_
 

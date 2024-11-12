@@ -12,7 +12,7 @@ def train_svc(X, y):
     gamma_range = np.arange(0.003, 0.02, 0.001)
     param_grid = dict(gamma=gamma_range, C=C_range)
     print(param_grid)
-    cv = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=42)
+    cv = StratifiedShuffleSplit(n_splits=5, test_size=0.3, random_state=42)
     grid = GridSearchCV(SVC(kernel='rbf'), param_grid=param_grid, cv=cv, scoring='f1', verbose=3)
     grid.fit(X, y)
     return grid.best_params_, grid.best_score_

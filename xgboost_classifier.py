@@ -27,8 +27,8 @@ def train_xgboost_with_tfidf(X_train, y_train) -> XGBClassifier:
     scorer = make_scorer(f1_score)
 
     random_search = RandomizedSearchCV(
-        pipeline, param_distributions, scoring=scorer, cv=2, n_jobs=1, 
-        verbose=3, n_iter=1, random_state=42
+        pipeline, param_distributions, scoring=scorer, cv=5, n_jobs=1,
+        verbose=3, n_iter=10, random_state=42
     )
 
     random_search.fit(X_train, y_train)
@@ -56,8 +56,8 @@ def train_xgboost(X_train, y_train) -> XGBClassifier:
     scorer = make_scorer(f1_score)
 
     random_search = RandomizedSearchCV(
-        pipeline, param_distributions, scoring=scorer, cv=2, n_jobs=1, 
-        verbose=3, n_iter=15, random_state=42
+        pipeline, param_distributions, scoring=scorer, cv=5, n_jobs=1,
+        verbose=3, n_iter=10, random_state=42
     )
 
     random_search.fit(X_train, y_train)
