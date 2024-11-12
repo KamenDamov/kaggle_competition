@@ -1,5 +1,5 @@
 from sklearn.naive_bayes import ComplementNB
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import uniform
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import f1_score, make_scorer

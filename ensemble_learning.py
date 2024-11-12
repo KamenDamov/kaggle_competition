@@ -4,10 +4,10 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import f1_score, make_scorer
 import numpy as np
-from cuml.naive_bayes import ComplementNB
+#from cuml.naive_bayes import ComplementNB
 from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
-from cuml.svm import SVC
+#from cuml.svm import SVC
 from scipy.stats import uniform
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_predict
