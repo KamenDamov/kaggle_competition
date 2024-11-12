@@ -109,28 +109,30 @@ Nous avons opté pour une recherche aléatoire plutôt qu'une recherche en grill
     \centering
     \begin{tabular}{|l|c|c|c|c|c|c|c|}
         \hline
-        \textbf{Model} & \textbf{SMOTE} & \textbf{Tree} & \textbf{Stopwords} &
-        \textbf{Cumulative Sum} & \textbf{Sous-échant.} & \textbf{Sur-échant.} &
+        \textbf{Model} & \textbf{SMOTE} & \textbf{Under sampl.} & \textbf{Tree} &
+        \textbf{Cum Sum} & \textbf{Stopwords} & \textbf{TF-IDF} &
         
         \textbf{Result} \\
         \hline
-        Model 1 & x & PCA & SMOTE & 0.85 & PCA & SMOTE & 0.85 \\
-        Model 2 & Normalization & None & SMOTE & 0.78 & PCA & SMOTE & 0.85\\
-        Model 3 & Standardization & LDA & None & 0.82 & PCA & SMOTE & 0.85\\
-        Model 4 & Normalization & PCA & Oversampling & 0.80 & PCA & SMOTE & 0.85\\
-        Model 4 & Normalization & PCA & Oversampling & 0.80 & PCA & SMOTE & 0.85\\
-        Model 4 & Normalization & PCA & Oversampling & 0.80 & PCA & SMOTE & 0.85\\
-        Model 4 & Normalization & PCA & Oversampling & 0.80 & PCA & SMOTE & 0.85\\
-        Model 4 & Normalization & PCA & Oversampling & 0.80 & PCA & SMOTE & 0.85\\
-        Model 4 & Normalization & PCA & Oversampling & 0.80 & PCA & SMOTE & 0.85\\
-        Model 4 & Normalization & PCA & Oversampling & 0.80 & PCA & SMOTE & 0.85\\
-        Model 4 & Normalization & PCA & Oversampling & 0.80 & PCA & SMOTE & 0.85\\
+        Bayes naïf vanille &  &  &  &  &  &  & 0.6019 \\
+        Complément de Bayes naïf &  &  &  &  &  & x & 0.5581\\
+        Complément de Bayes naïf &  &  &  &  &  &  & 0.5814\\
+        Complément de Bayes naïf &  &  & x &  & x & x & 0.5640\\
+        Complément de Bayes naïf & x &  & x &  & x & x & 0.6450\\
+        Complément de Bayes naïf &  & x &  & x & x &  & 0.6450\\
+        Classifier SVM &  & x &  & x & x &  & 0.6510\\
+        Classifier SGD avec Huber modifié &  & x &  & x & x &  & 0.6107\\
+        Classifieur XGBoost &  & x &  & x & x &  & 0.6457\\
+        Ensembles (CNB, XGBoost, LogReg) &  & x &  & x & x &  & 0.6819\\
+        Ensembles (CNB, XGBoost, LogReg) &  & x &  &  & x &  & 0.6785\\
+        Ensembles (CNB, XGBoost, SVC, SGD) &  & x &  & x & x &  & 0.6895\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et modèles}
     \label{tab:model_comparison}
 \end{table}
 \section{Discussion}
+Parler de pourquoi pas PCA, truncated-SVD ou autre?
 \subsection{Avantages et inconvénients}
 Un inconvénient de notre méthodologie a été que nous nous sommes lancés sur trop de modèles différents, alors qu'il aurait été plus efficace de se concentrer sur une poignée tels que seulement ceux décrits dans le rapport. La même méthodologie aurait dû être appliquée pour identifier clairement quelles méthodes de prétraitement étaient les meilleures.
 
