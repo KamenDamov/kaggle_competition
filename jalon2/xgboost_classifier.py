@@ -9,7 +9,7 @@ from sklearn.preprocessing import FunctionTransformer
 from xgboost import XGBClassifier
 
 def train_xgboost_with_tfidf(X_train, y_train) -> XGBClassifier:
-    # TFIDF génèrent de moins bonnes perfo sur validation
+    # TFIDF génèrent de moins bonnes perfo sur validation3,5,7,
     pipeline = Pipeline([
         ('tfidf', TfidfTransformer()),   
         ('to_float32', FunctionTransformer(lambda X: X.astype(np.float32))),           
