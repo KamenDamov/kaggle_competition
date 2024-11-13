@@ -4,6 +4,8 @@
 \usepackage[left=15mm, right=15mm, top = 15mm]{geometry}
 \usepackage{amsmath}
 \usepackage{algorithm}
+\usepackage{graphicx} % For including graphics
+\usepackage{svg}
 \usepackage{algorithmic}
 \DeclareMathOperator*{\argmax}{argmax}
 
@@ -107,17 +109,17 @@ Par soucis de présentation, nous renommons le modèle Complément Naive de Baye
         \textbf{F1 Val} & 
         \textbf{F1 Test} \\
         \hline
-        NB vanille &  &  &  &  &  &  & 0.6019 & 0.7196\\
-        CNB &  &  &  &  &  & x & 0.5581 & 0.7127\\
-        CNB &  &  & x &  & x & x & 0.5640 & 0.6324\\
-        CNB & x &  & x &  & x & x & 0.6450 & 0.6870\\
-        CNB &  & x &  & x & x &  & 0.6450 & N/A\\
-        LogReg &  & x &  & x & x &  & 0.6450 & N/A\\
-        SVM &  & x &  & x & x &  & 0.6510 & N/A\\
-        SGD avec Huber mod. &  & x &  & x & x &  & 0.6107 & 0.6629\\
-        XGBoost &  & x &  & x & x &  & 0.6457 & 0.6115\\
-        CNB, XGB, LogReg &  & x &  & x & x &  & 0.6819 & 0.7233\\
-        CNB, XGB, LogReg &  & x &  &  & x &  & 0.6785 & 0.7164\\
+        NB vanille &  &  &  &  &  &  & 0.5893 & 0.7196\\
+        CNB &  &  &  &  &  & x & 0.5611 & 0.7127\\
+        CNB &  &  & x &  & x & x & 0.5636 & 0.6324\\
+        CNB & x &  & x &  & x & x & 0.6556 & 0.6870\\
+        CNB &  & x &  & x & x &  & 0.7041 & N/A\\
+        LogReg &  & x &  & x & x &  & 0.6308 & N/A\\
+        SVM &  & x &  & x & x &  & 0.6415 & N/A\\
+        SGD avec Huber mod. &  & x &  & x & x &  & 0.6294 & 0.6629\\
+        XGBoost &  & x &  & x & x &  & 0.6592 & 0.6115\\
+        CNB, XGB, LogReg &  & x &  & x & x &  & 0.5983 & 0.7233\\
+        CNB, XGB, LogReg &  & x &  &  & x &  & 0.5956 & 0.7164\\
         CNB, XGB, SVC, SGD &  & x &  & x & x &  & 0.6895 & 0.7194\\
         \hline
     \end{tabular}
@@ -145,7 +147,88 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
 \end{enumerate}
 
 \section{Annexes}
-\subsection{Graphiques et Tables}
+\subsection{Graphiques}
+\begin{figure}[H]
+    \centering
+    % First image
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Cumulative Word Frequency Distribution with Stopwords Removed}.svg}
+        \caption{Caption for Image 1}
+    \end{minipage}%
+    \hfill
+    % Second image
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Cumulative Word Frequency Distribution with Words Removed by Cumulative Sum}.svg}
+        \caption{Caption for Image 2}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % First row
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with Docs Removed by Undersampling}.svg}
+        \caption{Caption for Image 1}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with No Transformation}.svg}
+        \caption{Caption for Image 2}
+    \end{minipage}
+
+    \vspace{0.5cm} % Space between rows
+
+    % Second row
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with Stopwords Removed}.svg}
+        \caption{Caption for Image 3}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with Words Removed by Cumulative Sum}.svg}
+        \caption{Caption for Image 4}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % First row
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with Docs Removed by Undersampling}.svg}
+        \caption{Caption for Image 1}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with No Transformation}.svg}
+        \caption{Caption for Image 2}
+    \end{minipage}
+
+    \vspace{0.5cm} % Space between rows
+
+    % Second row
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with Stopwords Removed}.svg}
+        \caption{Caption for Image 3}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with Words Removed by Cumulative Sum}.svg}
+        \caption{Caption for Image 4}
+    \end{minipage}
+\end{figure}
+
+
+\subsection{Tables}
 \begin{table}[H]
     \centering
     \begin{tabular}{|l|c|c|}
@@ -153,12 +236,11 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \textbf{Model} & \textbf{$\alpha$} &
         \textbf{F1}\\
         \hline
-        Bayes naïf vanille & & 0.6019 \\
-        CNB &  & 0.5581\\
-        CNB &  & 0.5814\\
-        CNB &  & 0.5640\\
-        CNB &  & 0.6450\\
-        CNB &  & 0.6450\\
+        Bayes naïf vanille & 0.45 & 0.5893 \\
+        CNB & 0.0872 & 0.5611\\
+        CNB & 1.0980 & 0.5636\\
+        CNB & 0.0872 & 0.6556\\
+        CNB & 1.4261 & 0.7041\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour Les modèles bayésien}
@@ -171,7 +253,7 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \textbf{Model} & \textbf{Coefficient RBF} & \textbf{Poids régularisation} &
         \textbf{F1} \\
         \hline
-        SVM &  &  &  0.6510\\
+        SVM & 0.005 & 53 & 0.6415\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour SVM}
@@ -183,7 +265,7 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \hline
         \textbf{Model} & \textbf{l1 ratio} & \textbf{Poids régularisation} & \textbf{F1} \\
         \hline
-        SGD avec Huber modifié &  &  & 0.6107\\
+        SGD avec Huber modifié & 0.223 & 0.01 & 0.6294\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour SVM}
@@ -198,7 +280,7 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \textbf{subsample} &
         \textbf{F1} \\
         \hline
-        XGBoost & & & & & 0.6107\\
+        XGBoost & 0.0378 & 500 & 10 & 0.7465 & 0.6592\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour XGBoost}
@@ -213,12 +295,13 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \textbf{Solveur} &
         \textbf{F1}\\
         \hline
-        LogReg & & l1 & liblinear & 0.5581\\
+        LogReg & 0.6808 & l1 & liblinear & 0.6308\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour régression logistique utilisée dans les modèles ensemblistes}
     \label{tab:model_comparison}
 \end{table}
+
 \subsection{Algorithmes}
 \subsubsection{Classifieur par ensemble}
 \begin{algorithm}
