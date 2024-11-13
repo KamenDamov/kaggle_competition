@@ -5,19 +5,25 @@ from sklearn.metrics import f1_score, make_scorer
 from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 
 
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-scorer = make_scorer(f1_score)
-
 def train_sgd(X_train, y_train):
+    """Entraine un modèle de SGD avec perte Huber modifié et pénalité elasticnet"""
+
     pipeline = Pipeline([
         ('model', SGDClassifier(loss='modified_huber', penalty='elasticnet', max_iter=10000))
     ])
+
+    # Définir la distribution des paramètres à évaluer
     param_grid = {
         'model__alpha': np.logspace(-2, 0, 10),
         'model__l1_ratio': np.linspace(0.001, 1, 10)
     }
 
-    random_search = random_search = RandomizedSearchCV(
+    # Valider à l'aide du score f1
+    scorer = make_scorer(f1_score)
+
+    # Faire 10 itérations avec 5-folds
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    random_search = RandomizedSearchCV(
         pipeline, param_distributions=param_grid, scoring=scorer, cv=cv,
         n_iter=10, n_jobs=1, random_state=0, verbose=3
     )

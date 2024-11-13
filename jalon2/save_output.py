@@ -6,6 +6,7 @@ import pandas as pd
 
 
 def verify_submissions(predictions):
+    """Vérifie si une soumission a les mêmes prédictions"""
     for file in os.listdir('submissions'):
         if file.endswith('.csv'):
             with open(os.path.join('submissions', file), 'r') as f:
@@ -15,7 +16,9 @@ def verify_submissions(predictions):
                 return file
     return None
 
+
 def verify_output(predictions, newly_saved):
+    """Vérifie si une ou plusieurs anciennes prédictions ont les mêmes prédictions"""
     all_files = []
     for root, dirs, files in os.walk('output'):
         for file in files:
@@ -25,10 +28,13 @@ def verify_output(predictions, newly_saved):
                 label_file = np.array([int(label.split(",")[-1].strip()) for label in lines])
                 if np.all(label_file == predictions):
                     all_files.append(os.path.join(root, file))
-
     return all_files if len(all_files) > 0 else [None]
 
+
 def save_output(predictions, classifier, params, transformations):
+    """Sauve les prédictions dans un dossier du jour (sous ./output) avec le temps à laquelle il a été enregistré et quelle a été
+    le classifieur utilisé, les paramètres finaux utilisés et les transformations appliquées"""
+
     today = datetime.now().strftime('%Y%m%d')
     now = datetime.now().strftime('%H%M%S')
     if not os.path.exists('output/' + today):
