@@ -236,12 +236,11 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \textbf{Model} & \textbf{$\alpha$} &
         \textbf{F1}\\
         \hline
-        Bayes naïf vanille & & 0.6019 \\
-        CNB &  & 0.5581\\
-        CNB &  & 0.5814\\
-        CNB &  & 0.5640\\
-        CNB &  & 0.6450\\
-        CNB &  & 0.6450\\
+        Bayes naïf vanille & 0.45 & 0.5893 \\
+        CNB & 0.0872 & 0.5611\\
+        CNB & 1.0980 & 0.5636\\
+        CNB & 0.0872 & 0.6556\\
+        CNB & 1.4261 & 0.7041\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour Les modèles bayésien}
@@ -254,7 +253,7 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \textbf{Model} & \textbf{Coefficient RBF} & \textbf{Poids régularisation} &
         \textbf{F1} \\
         \hline
-        SVM &  &  &  0.6510\\
+        SVM & 0.005 & 53 & 0.6415\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour SVM}
@@ -266,7 +265,7 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \hline
         \textbf{Model} & \textbf{l1 ratio} & \textbf{Poids régularisation} & \textbf{F1} \\
         \hline
-        SGD avec Huber modifié &  &  & 0.6107\\
+        SGD avec Huber modifié & 0.223 & 0.01 & 0.6294\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour SVM}
@@ -281,7 +280,7 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \textbf{subsample} &
         \textbf{F1} \\
         \hline
-        XGBoost & & & & & 0.6107\\
+        XGBoost & 0.0378 & 500 & 10 & 0.7465 & 0.6592\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour XGBoost}
@@ -296,12 +295,13 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \textbf{Solveur} &
         \textbf{F1}\\
         \hline
-        LogReg & & l1 & liblinear & 0.5581\\
+        LogReg & 0.6808 & l1 & liblinear & 0.6308\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour régression logistique utilisée dans les modèles ensemblistes}
     \label{tab:model_comparison}
 \end{table}
+
 \subsection{Algorithmes}
 \subsubsection{Classifieur par ensemble}
 \begin{algorithm}
