@@ -4,6 +4,8 @@
 \usepackage[left=15mm, right=15mm, top = 15mm]{geometry}
 \usepackage{amsmath}
 \usepackage{algorithm}
+\usepackage{graphicx} % For including graphics
+\usepackage{svg}
 \usepackage{algorithmic}
 \DeclareMathOperator*{\argmax}{argmax}
 
@@ -145,7 +147,88 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
 \end{enumerate}
 
 \section{Annexes}
-\subsection{Graphiques et Tables}
+\subsection{Graphiques}
+\begin{figure}[H]
+    \centering
+    % First image
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Cumulative Word Frequency Distribution with Stopwords Removed}.svg}
+        \caption{Caption for Image 1}
+    \end{minipage}%
+    \hfill
+    % Second image
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Cumulative Word Frequency Distribution with Words Removed by Cumulative Sum}.svg}
+        \caption{Caption for Image 2}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % First row
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with Docs Removed by Undersampling}.svg}
+        \caption{Caption for Image 1}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with No Transformation}.svg}
+        \caption{Caption for Image 2}
+    \end{minipage}
+
+    \vspace{0.5cm} % Space between rows
+
+    % Second row
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with Stopwords Removed}.svg}
+        \caption{Caption for Image 3}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with Words Removed by Cumulative Sum}.svg}
+        \caption{Caption for Image 4}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    % First row
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with Docs Removed by Undersampling}.svg}
+        \caption{Caption for Image 1}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with No Transformation}.svg}
+        \caption{Caption for Image 2}
+    \end{minipage}
+
+    \vspace{0.5cm} % Space between rows
+
+    % Second row
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with Stopwords Removed}.svg}
+        \caption{Caption for Image 3}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with Words Removed by Cumulative Sum}.svg}
+        \caption{Caption for Image 4}
+    \end{minipage}
+\end{figure}
+
+
+\subsection{Tables}
 \begin{table}[H]
     \centering
     \begin{tabular}{|l|c|c|}
