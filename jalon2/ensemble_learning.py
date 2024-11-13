@@ -6,10 +6,14 @@ import numpy as np
 from sklearn.naive_bayes import ComplementNB
 from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
-from sklearn.svm import SVC
+from cuml.svm import SVC
 from scipy.stats import uniform
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_predict
+
+import gc
+import torch
+from GPUtil import showUtilization as gpu_usage
 
 
 # Définit paramètres de validation croisée
@@ -65,6 +69,17 @@ def create_pipeline_and_params(model_name):
     
     return pipeline, param_grid
 
+def free_gpu_cache():
+    print("Initial GPU Usage")
+    gpu_usage()
+
+    gc.collect()
+    torch.cuda.empty_cache()
+
+    print("GPU Usage after emptying the cache")
+    gpu_usage()
+
+
 def tune_model(pipeline, param_grid, X_train, y_train):
     """Appliquer validation croisée aléatoire à un modèle spécifique"""
     random_search = RandomizedSearchCV(
@@ -79,8 +94,9 @@ def tune_model(pipeline, param_grid, X_train, y_train):
         y_val_pred = y_pred[val_idx]
         cm = confusion_matrix(y_val_true, y_val_pred)
         # print(f'Confusion Matrix - Fold {fold + 1}:\n{cm}\n')
-    
-    return random_search.best_estimator_
+    best_estimator = random_search.best_estimator_
+
+    return best_estimator
 
 def train_ensemble(X_train, y_train, model_names):
     """Point d'entrée pour entraîner un VotingClassifier"""
@@ -90,10 +106,13 @@ def train_ensemble(X_train, y_train, model_names):
         pipeline, param_grid = create_pipeline_and_params(model_name)
         best_model = tune_model(pipeline, param_grid, X_train, y_train)
         tuned_models.append((model_name.lower(), best_model))
-    
+
+    print("instancing")
     ensemble = VotingClassifier(estimators=tuned_models, voting='soft')
+    print("fitting")
     ensemble.fit(X_train, y_train)
-    
+
+
     return ensemble
 
 def estimate(X_test, model):
