@@ -4,14 +4,13 @@
 \usepackage[left=15mm, right=15mm, top = 15mm]{geometry}
 \usepackage{amsmath}
 \usepackage{algorithm}
-\usepackage{algpseudocode}
+%\usepackage{algpseudocode}
 \usepackage{svg}
 \usepackage{algorithmic}
 \DeclareMathOperator*{\argmax}{argmax}
 \title{Compétition Kaggle - Rapport}
 \author{Guillaume Genois, 20248507 \\Kamen Damov, 20102811}
 \date{12 novembre 2024}
-
 \begin{document}
 \maketitle
 \section{Introduction}
@@ -28,13 +27,13 @@ Nous générons $1000$ observations dans la classe minoritaire.
 \subsubsection{Sous-échantillonage}
 Si nous tentons plutôt de sous-échantilloner, il nous est possible de retirer des observations aléatoirement dans la classe majoritaire jusqu'à un seuil choisi. Pour la compétition, nous avons choisi de retirer la moitié des données dans la classe majoritaire ce qui nous permet de garder nos classes débalancées, mais nous passons d'un ratio de 76/14 à environ 60/40. Par ce fait même, nous retirons environ 3000 lignes du jeu d'entraînement, mais nous considérons qu'une taille d'environ 7000 lignes reste raisonnable pour l'entrainement. Voir annexes pour ces graphiques (Figure 3 à 6).
 \subsection{Réduction de dimensions}
-Étant donné que nos vecteurs sont de très hautes dimensions, nous avons penser à retirer des attributs (qui sont les mots inclus dans le corpus de texte fournis) pour accélérer l'entraînement et enlever les attributs qui n'apportent aucune information quant à la discrimination dans la classe 0 ou 1. Nous avons testé deux méthodes pour réduire les dimensions selon un calcul. Deux autres méthodes ont aussi été essayées en prenant plutôt en compte le sens des mots.
+Étant donné que nos vecteurs sont de très hautes dimensions, nous avons penser à retirer des attributs (qui sont les mots inclus dans le corpus de texte fournis) pour accélérer l'entraînement et enlever les attributs qui n'apportent aucune information quant à la discrimination dans la classe 0 ou 1. Nous avons testé deux méthodes pour réduire les dimensions selon un calcul. Une autre méthode ont aussi été essayées en prenant plutôt en compte le sens des mots.
 \subsubsection{Réduction à base d'arbres}
 Nous utilisons un arbre de décision avec le critère de Gini pour évaluer l'importance des attributs. Le coefficcient de Gini est calculé ainsi: $\text{Gini} = 1 - \sum_{i=1}^{C} \mathbb{P}[\text{un points choisi aléatoirement appartient à $C_i$}]^2$ avec $C_i \in C$. À chaque division, l’arbre choisit l’attribut qui réduit le plus l'impureté de Gini, indiquant ainsi les attributs les plus discriminants pour la prédiction. En analysant l'importance cumulative de chaque attribut dans l'ensemble de l'arbre, nous extrayons les $k$ attributs les plus importants, ceux-ci étant les plus déterminants pour la prédiction.
 \subsubsection{Réduction à base de fréquences cumulatives}
-Sachant que le jeu de données est très éparse,  nous avons tenter de retirer les mots qui surviennent très rarement à travers le corpus de texte. Nous détectons ces mots en calculant la somme des fréquences d'un mot à travers tout le corpus, en triant le corpus en ordre croissant, et en retirant une proportion des mots du jeu de données en tronquant le vecteurs de fréquences cumulatives, à l'indice qui couvre la proportion voulue du corpus. En somme, nous retirons les mots qui ne sont pas fréquents dans le corpus. Voir Annexe pour algorithme plus détaillé. 
+Sachant que le jeu de données est très éparse,  nous avons tenter de retirer les mots qui surviennent très rarement à travers le corpus de texte. Nous détectons ces mots en calculant la somme des fréquences d'un mot à travers tout le corpus, en triant le corpus en ordre croissant, et en retirant une proportion des mots du jeu de données en tronquant le vecteurs de fréquences cumulatives, à l'indice qui couvre la proportion voulue du corpus. En somme, nous retirons les mots qui ne sont pas fréquents dans le corpus. En résultat, nous enlevons plus de 20000 mots en gardant 95\% des mots les plus fréquents. Voir Algorithme 2 pour plus de détails sur la méthode, et Figure 1 et 2 pour une représentation visuelle de la transformation. 
 \subsubsection{Réduction en retirant les mots vides}
-En langage naturel, certains mots n'apportent pas de sens à une phrase. Ils ne sont présents que pour faire les liaisons et les transitions fluides entre les mots. Ceux-ci se font appeler les mots vides ("stopwords"). En anglais, des exemples de ces mots sont "the", "of", "a", etc. En dessinant le graphique de la fréquence de ces mots, il est possible de remarquer que certains apparaissent très souvents tels que juste qu'à $10 000$ fois à travers les documents. Il apparait alors intéressant de retirer les colonnes de ces mots dans nos jeux d'entrainement et de test. La dimensionnalité diminue alors d'environ ... colonnes.
+En langage naturel, certains mots n'apportent pas de sens à une phrase. Ils ne sont présents que pour faire les liaisons et les transitions fluides entre les mots. Ceux-ci se font appeler les mots vides ("stopwords"). En anglais, des exemples de ces mots sont "the", "of", "a", etc. En dessinant le graphique de la fréquence de ces mots, il est possible de remarquer que certains apparaissent très souvents tels que juste qu'à $10 000$ fois à travers les documents. Il apparait alors intéressant de retirer les colonnes de ces mots dans nos jeux d'entrainement et de test. La dimensionnalité diminue alors d'environ 40 colonnes. Voir graphiques dans l'annexe (Figure 11 à 14).
 \subsection{Transformation TF-IDF}
 Afin de mesurer l'importance d'un mot selon sa fréquence à travers les documents, il est possible de le transformer avec TF-IDF. La formule est la suivante :
 \[m_{x,y} = {tf}_{x,y} * log(\frac{n}{1 + df_x})\]
@@ -72,7 +71,7 @@ Le principe d'un SVM est de trouver un hyperplan qui sépare les données de dif
 La régression logistique utilise une fonction sigmoïde pour transformer la sortie linéaire en une probabilité comprise entre 0 et 1, ce qui permet de modéliser la probabilité d'appartenance à une classe. Le modèle cherche à optimiser les coefficients associés à chaque caractéristique pour minimiser la différence entre les prédictions et les étiquettes réelles. Si la probabilité est assez haute d'être dans une classe, cette classe lui est attribuée.
 
 \subsection{Classifieur d'apprentissage par ensembles}
-Nous avons tenter de combiner plusieurs modèles de nature différentes et d'aggréger leurs prédictions dans le but d'augmenter la performance sur le score F1. Cette procédure consiste à entraîner indépendamment des classifieurs et procéder à un vote lisse en extrayant et aggrégeant les probabilités de classification de chaque modèle dans l'ensemble. Dans notre cas, nous avons entraîner un classifieur complémentaire de Bayes (modèle fréquentiste), un classifieur XGBoost (modèle à base d'arbres de décision), et un classifieur SVM sous perte Huber modifiée à descente de gradient stochastique (modèle linéaire). Il est important de noter que nous avons choisi ces modèles pour avoir une frontière de décision de nature différente, et avoir des estimations plus robustes, qui ne sont pas biaisées par la similarité de la frontière de décision apprise entre les modèles. Voir algorithme 1 dans l'annexe, pour une description plus rigoureuse de la méthode.
+Nous avons tenter de combiner plusieurs modèles de nature différentes et d'aggréger leurs prédictions dans le but d'augmenter la performance sur le score F1. Cette procédure consiste à entraîner indépendamment des classifieurs et procéder à un vote lisse en extrayant et aggrégeant les probabilités de classification de chaque modèle dans l'ensemble. Dans notre cas, nous avons entraîner un classifieur complémentaire de Bayes (modèle fréquentiste), un classifieur XGBoost (modèle à base d'arbres de décision), et un classifieur SVM sous perte Huber modifiée à descente de gradient stochastique (modèle linéaire). Il est important de noter que nous avons choisi ces modèles pour avoir une frontière de décision de nature différente, et avoir des estimations plus robustes, qui ne sont pas biaisées par la similarité de la frontière de décision apprise entre les modèles. Voir algorithme 2 dans l'annexe, pour une description plus rigoureuse de la méthode.
 
 \section{Méthodologie}
 \subsection{Répartition pour l'entrainement et la validation}
@@ -115,7 +114,6 @@ Par soucis de présentation, nous renommons le modèle Complément Naive de Baye
 \end{table}
 En analysant le score F1, on peut voir que les méthodes d'apprentissages par ensemble performent mieux que les modèles uniques sur l'ensemble de test privé. De plus, les modèles ensemblistes ont aussi une plus petite variance en nous basant sur la Table 1. Étant donné l'entraînement indépendant de chaque modèle, les valeurs des hyperparamètres dans les ensembles de modèles, sont les mêmes que les hyperparamètres optimaux trouvés dans les modèles individuels. Les modèles de bayésiens priorisent des valeurs arbitrairement petite ou grande de $\alpha$ ce qui nous indique que le lissage des probabilités dépend fortement des subdivisions aléatoires de validation pour la recherche du $\alpha$ optimal. Pour ce qui est des modèles à base d'arbres, ceux-ci priorisent plus d'estimateurs profonds, retournant les bornes maximales pour les hyperparamètres du nombre d'arbre $=500$, et profondeur maximale des arbres $=10$. Pour ce qui est des modèles linéaires (SGD, SVC, régression logistique), on peut observer un biais systématique pour un plus gros poids des termes de régularisations qui témoigne d'une préférence pour pour les modèles plus simples. Voir l'annexe pour des détails sur les valeurs exactes des hyperparamètres en lien avec la performance des modèles. Il est intéressant de noter que malgré la performance souvent plus faible sur l'ensemble de validation, les modèles ensemblistes produisent des résultats moins variables, quel que soit le choix de prétraitement de données, et modèles choisis. Ceci témoigne du lissage des erreurs de prédictions des modèles individuels ce qui diminue la variance des prédictions.
 \section{Discussion}
-Parler de pourquoi pas PCA, truncated-SVD ou autre?
 \subsection{Avantages et inconvénients}
 Un inconvénient de notre méthodologie a été que nous nous sommes lancés sur trop de modèles différents, alors qu'il aurait été plus efficace de se concentrer sur une poignée tels que seulement ceux décrits dans le rapport. La même méthodologie aurait dû être appliquée pour identifier clairement quelles méthodes de prétraitement étaient les meilleures.
 
@@ -151,7 +149,6 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
         \caption{Somme cumulative de fréquences des mots - avec mots vide retirés}
     \end{minipage}
 \end{figure}
-
 \begin{figure}[H]
     \centering
     % First row
@@ -214,6 +211,36 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
     \end{minipage}
 \end{figure}
 
+\begin{figure}[H]
+    \centering
+    % First row
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Top 10 most frequent words with Docs Removed by Undersampling}.svg}
+        \caption{Top mots les plus fréquents après sous échantillonnage}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Top 10 most frequent words with No Transformation}.svg}
+        \caption{Top 10 mots les plus fréquents sans transformation}
+    \end{minipage}
+
+    \vspace{0.5cm} % Space between rows
+
+    % Second row
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Top 10 most frequent words with Stopwords Removed}.svg}
+        \caption{Top 10 mots les plus fréquents avec mots vides retirés}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includesvg[width=\linewidth]{visuals/{Top 10 most frequent words with Words Removed by Cumulative Sum}.svg}
+        \caption{Top 10 mots les plus fréquents retirés par somme cumulative.}
+    \end{minipage}
+\end{figure}
 
 \subsection{Tables}
 
@@ -309,49 +336,42 @@ Avec respectivement la dérivée première pour le gradient et seconde pour l'He
 
 \begin{algorithm}
 \caption{Calcul de la fréquence cumulative et filtrage des mots les moins fréquents}
-\begin{algorithmic}[1]
-\Require Liste des mots $words$ et leur fréquence $freqs$, seuil de fréquence cumulative $threshold$
-\Ensure Liste des mots filtrés $filtered\_words$
-
-\State Trier $words$ par ordre décroissant de $freqs$
-\State $cumulative\_sum \gets 0$
-\State $filtered\_words \gets []$
-
-\For{$i \gets 1$ to $\text{length}(words)$}
-    \State $cumulative\_sum \gets cumulative\_sum + freqs[i]$
-    \If{$cumulative\_sum \geq threshold$}
-        \State \textbf{break}
-    \Else
-        \State Ajouter $words[i]$ à $filtered\_words$
-    \EndIf
-\EndFor
-
-\State \Return $filtered\_words$
-
-\end{algorithmic}
+\textbf{Input:} Liste des mots $words$ et leur fréquence $freqs$, seuil de fréquence cumulative $threshold$ \\
+\textbf{Output:} Liste des mots filtrés $filtered\_words$
+\begin{enumerate}
+    \item Trier $words$ par ordre décroissant de $freqs$.
+    \item Initialiser $cumulative\_sum \gets 0$ et $filtered\_words \gets []$.
+    \item Pour chaque indice $i$ de $1$ à $\text{length}(words)$:
+    \begin{itemize}
+        \item Calculer $cumulative\_sum \gets cumulative\_sum + freqs[i]$.
+        \item Si $cumulative\_sum \geq threshold$, alors \textbf{arrêter la boucle}.
+        \item Sinon, ajouter $words[i]$ à $filtered\_words$.
+    \end{itemize}
+    \item Retourner $filtered\_words$.
+\end{enumerate}
 \end{algorithm}
+
 \begin{algorithm}
 \caption{Algorithme de Vote Lisse pour un Classifieur Ensembliste}
-\begin{algorithmic}[1]
-\State \textbf{Input:} Un ensemble de modèles  $\Gamma = \{\gamma_1, \gamma_2, \dots, \gamma_k\}$, des poids associés $\{w_1, w_2, \dots, w_k\}$, un échantillon à classifier $x$.
-\State \textbf{Output:} Classe prédite pour l'échantillon $x$.
-
-\ForAll{$\gamma_i \in \Gamma$ }
-    \State Obtenir la probabilité prédite pour chaque classe $c$: $P(c|x, M_i)$.
-\EndFor
-
-\For{chaque classe $c$}
-    \State Calculer la probabilité agrégée pour la classe $c$ :
+\textbf{Input:} Un ensemble de modèles $\Gamma = \{\gamma_1, \gamma_2, \dots, \gamma_k\}$, des poids associés $\{w_1, w_2, \dots, w_k\}$, un échantillon à classifier $x$ \\
+\textbf{Output:} Classe prédite pour l'échantillon $x$
+\begin{enumerate}
+    \item Pour chaque modèle $\gamma_i$ dans $\Gamma$ :
+    \begin{itemize}
+        \item Obtenir la probabilité prédite pour chaque classe $c$: $P(c|x, M_i)$.
+    \end{itemize}
+    \item Pour chaque classe $c$ :
+    \begin{itemize}
+        \item Calculer la probabilité agrégée pour la classe $c$ :
+        \[
+        P(c|x) = \frac{\sum_{i=1}^k w_i \cdot P(c|x, M_i)}{\sum_{i=1}^k w_i}
+        \]
+    \end{itemize}
+    \item Retourner la classe avec la probabilité agrégée maximale :
     \[
-    P(c|x) = \frac{\sum_{i=1}^k w_i \cdot P(c|x, M_i)}{\sum_{i=1}^k w_i}
+    \hat{y} = \arg\max_c P(c|x)
     \]
-\EndFor
-
-\State Retourner la classe avec la probabilité agrégée maximale :
-\[
-\hat{y} = \arg\max_c P(c|x)
-\]
-
-\end{algorithmic}
+\end{enumerate}
 \end{algorithm}
+
 \end{document}
