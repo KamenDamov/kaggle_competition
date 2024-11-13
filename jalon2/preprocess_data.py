@@ -5,26 +5,30 @@ from imblearn.over_sampling import SMOTE
 import re
 
 def compute_tf(matrix):
+    """Calculer TF"""
     tf_matrix = np.zeros(matrix.shape)
     for i, doc in enumerate(matrix):
-        total_terms = np.sum(doc)  # Total number of terms in document
-        tf_matrix[i] = doc / total_terms  # TF for each term
+        total_terms = np.sum(doc)  
+        tf_matrix[i] = doc / total_terms 
     return tf_matrix
 
 
 def compute_idf(matrix):
+    """Calculer Fréquence du document inverse"""
     num_docs = matrix.shape[0]
     idf = np.zeros(matrix.shape[1])
     for j in range(matrix.shape[1]):
-        doc_count = np.sum(matrix[:, j] > 0)  # Number of documents containing the term
-        idf[j] = np.log((num_docs + 1) / (1 + doc_count)) + 1  # Smoothing
+        doc_count = np.sum(matrix[:, j] > 0)  
+        idf[j] = np.log((num_docs + 1) / (1 + doc_count)) + 1  
     return idf
 
 
 def compute_tfidf(tf_matrix, idf_vector):
+    """Calculer TF-IDF"""
     return tf_matrix * idf_vector
 
 def tree_based_dimensionality_reduction(X_train, y_train, top_features=5000):
+    """Reduction de dimension à base d'arbre de décision"""
     tree = DecisionTreeClassifier(random_state=0)
     tree.fit(X_train, y_train)
     importances = tree.feature_importances_
@@ -36,6 +40,7 @@ def tree_based_dimensionality_reduction(X_train, y_train, top_features=5000):
     return X_train_reduced, sorted_indices
 
 def smote_oversampling(X, y, new_samples=1000):
+    """Utilisation de l'algorithme de SMOTE pour générer de nouveaux échantillons"""
     class_counts = np.bincount(y)
     minority_class = np.argmin(class_counts)
     target_count = class_counts[minority_class] + new_samples
@@ -45,6 +50,7 @@ def smote_oversampling(X, y, new_samples=1000):
     return X_resampled, y_resampled
 
 def boostrap_oversampling(X, y, new_samples=1000):
+    """Utilisation de boostrap pour balancer les classes"""
     unique_classes, class_counts = np.unique(y, return_counts=True)
     minority_class = unique_classes[np.argmin(class_counts)]
     X_minority = X[y == minority_class]
@@ -58,6 +64,7 @@ def boostrap_oversampling(X, y, new_samples=1000):
     return X_resampled, y_resampled
 
 def random_undersampling(X, y, new_samples=3562):
+    """Sous-échantillonnage, en retirant la moitié des observations dans la classe amjoritaire"""
     unique, counts = np.unique(y, return_counts=True)
     majority_class = unique[np.argmax(counts)]
     majority_indices = np.where(y == majority_class)[0]
@@ -71,9 +78,9 @@ def random_undersampling(X, y, new_samples=3562):
     return X[resampled_indices], y[resampled_indices]
 
 def combine_columns(X, unique_words, word_mapping):
+    """Combiner les colonnes"""
     new_X = np.zeros((X.shape[0], len(unique_words)))
 
-    # Fill the new matrix with summed occurrences
     for stem, indices in word_mapping.items():
         for idx in indices:
             new_X[:, unique_words.index(stem)] += X[:, idx]
@@ -81,6 +88,7 @@ def combine_columns(X, unique_words, word_mapping):
     return new_X
 
 def get_indices_to_remove_cum_sum(all_data: np.array, threshold: float) -> np.array:
+    """Retirer les mots qui reviennent rarement par le biais de la somme cumulative"""
     feature_sums = np.sum(all_data, axis=0)
     sorted_indices = np.argsort(feature_sums)[::-1]
     sorted_sums = feature_sums[sorted_indices]
@@ -94,6 +102,7 @@ def get_indices_to_remove_cum_sum(all_data: np.array, threshold: float) -> np.ar
     return indices_to_remove
 
 class DataPreprocess:
+    """Classe pour lancer les méthodes de prétraitement"""
     test: np.array = np.array([]) 
     train: np.array = np.array([])
     vocab_map: np.array = np.array([])
@@ -116,17 +125,12 @@ class DataPreprocess:
         self.train_tfidf = compute_tfidf(compute_tf(self.train), compute_idf(self.train))
         self.test_tfidf = compute_tfidf(compute_tf(self.test), compute_idf(self.test))
 
-    def remove_min_max(self, min, max):
-        # min or max can be absolute value or % value
-        pass
-
     def remove_cum_sum(self):
         indices_to_remove = get_indices_to_remove_cum_sum(self.train, 0.95)
         self.train = np.delete(self.train, indices_to_remove, axis=1)
         self.test = np.delete(self.test, indices_to_remove, axis=1)
 
     def remove_stopwords(self):
-        # TODO: use list instead of opening document
         with open('english_stopwords', 'r') as f:
             stopwords = [line.strip() for line in f.readlines()]
         idx_stopwords = [i for i in range(len(self.vocab_map)) if self.vocab_map[i] in stopwords]
@@ -149,8 +153,6 @@ class DataPreprocess:
 
     def apply_stemming(self):
         stemmer = SnowballStemmer("english")
-
-        # Create a mapping of stemmed words to their original indices
         stemmed_word_mapping = {}
         for idx, word in enumerate(self.vocab_map):
             stemmed_word = stemmer.stem(word)

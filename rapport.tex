@@ -154,14 +154,14 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
     \begin{minipage}{0.45\textwidth}
         \centering
         \includesvg[width=\linewidth]{visuals/{Cumulative Word Frequency Distribution with Stopwords Removed}.svg}
-        \caption{Caption for Image 1}
+        \caption{Somme cumulative de fréquences des mots}
     \end{minipage}%
     \hfill
     % Second image
     \begin{minipage}{0.45\textwidth}
         \centering
         \includesvg[width=\linewidth]{visuals/{Cumulative Word Frequency Distribution with Words Removed by Cumulative Sum}.svg}
-        \caption{Caption for Image 2}
+        \caption{Somme cumulative de fréquences des mots - avec mots vide retirés}
     \end{minipage}
 \end{figure}
 
@@ -171,13 +171,13 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
     \begin{minipage}{0.45\textwidth}
         \centering
         \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with Docs Removed by Undersampling}.svg}
-        \caption{Caption for Image 1}
+        \caption{Fréquence de longueur des documents après sous échantillonnage}
     \end{minipage}%
     \hfill
     \begin{minipage}{0.45\textwidth}
         \centering
         \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with No Transformation}.svg}
-        \caption{Caption for Image 2}
+        \caption{Fréquence de longueur des documents sans transformation}
     \end{minipage}
 
     \vspace{0.5cm} % Space between rows
@@ -186,13 +186,13 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
     \begin{minipage}{0.45\textwidth}
         \centering
         \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with Stopwords Removed}.svg}
-        \caption{Caption for Image 3}
+        \caption{Fréquence de longueur des documents avec mots vides retirés}
     \end{minipage}%
     \hfill
     \begin{minipage}{0.45\textwidth}
         \centering
         \includesvg[width=\linewidth]{visuals/{Documents Length Frequency Distribution with Words Removed by Cumulative Sum}.svg}
-        \caption{Caption for Image 4}
+        \caption{Fréquence de longueur des documents avec fréquences relatives retirées}
     \end{minipage}
 \end{figure}
 
@@ -202,13 +202,13 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
     \begin{minipage}{0.45\textwidth}
         \centering
         \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with Docs Removed by Undersampling}.svg}
-        \caption{Caption for Image 1}
+        \caption{Distributions de fréquences globales des mots avec sous-échantillonnage}
     \end{minipage}%
     \hfill
     \begin{minipage}{0.45\textwidth}
         \centering
         \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with No Transformation}.svg}
-        \caption{Caption for Image 2}
+        \caption{Distributions de fréquences globales des mots sans transformation}
     \end{minipage}
 
     \vspace{0.5cm} % Space between rows
@@ -217,30 +217,32 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
     \begin{minipage}{0.45\textwidth}
         \centering
         \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with Stopwords Removed}.svg}
-        \caption{Caption for Image 3}
+        \caption{Distributions de fréquences globales des mots avec mots vides retirés}
     \end{minipage}%
     \hfill
     \begin{minipage}{0.45\textwidth}
         \centering
         \includesvg[width=\linewidth]{visuals/{Overall Word Frequency Distribution with Words Removed by Cumulative Sum}.svg}
-        \caption{Caption for Image 4}
+        \caption{Distributions de fréquences globales des mots avec somme cumulative retirée}
     \end{minipage}
 \end{figure}
 
 
 \subsection{Tables}
+
 \begin{table}[H]
     \centering
-    \begin{tabular}{|l|c|c|}
+    \begin{tabular}{|l|c|c|c|}
         \hline
         \textbf{Model} & \textbf{$\alpha$} &
-        \textbf{F1}\\
+        \textbf{F1 Val} &
+        \textbf{F1 Test}\\
         \hline
-        Bayes naïf vanille & 0.45 & 0.5893 \\
-        CNB & 0.0872 & 0.5611\\
-        CNB & 1.0980 & 0.5636\\
-        CNB & 0.0872 & 0.6556\\
-        CNB & 1.4261 & 0.7041\\
+        Bayes naïf vanille & 0.45 & 0.5893 & 0.7196\\
+        CNB & 0.0872 & 0.5611 & 0.7127\\
+        CNB & 1.0980 & 0.5636 & 0.6324\\
+        CNB & 0.0872 & 0.6556 & 0.6870\\
+        CNB & 1.4261 & 0.7041 & N/A\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour Les modèles bayésien}
@@ -248,24 +250,14 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
 \end{table}
 \begin{table}[H]
     \centering
-    \begin{tabular}{|l|c|c|c|}
+    \begin{tabular}{|l|c|c|c|c|}
         \hline
         \textbf{Model} & \textbf{Coefficient RBF} & \textbf{Poids régularisation} &
-        \textbf{F1} \\
+        \textbf{F1 Val} &
+        \textbf{F1 Test}
+        \\
         \hline
-        SVM & 0.005 & 53 & 0.6415\\
-        \hline
-    \end{tabular}
-    \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour SVM}
-    \label{tab:model_comparison}
-\end{table}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|l|c|c|c|}
-        \hline
-        \textbf{Model} & \textbf{l1 ratio} & \textbf{Poids régularisation} & \textbf{F1} \\
-        \hline
-        SGD avec Huber modifié & 0.223 & 0.01 & 0.6294\\
+        SVM & 0.005 & 53 & 0.6415 & N/A\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour SVM}
@@ -273,14 +265,28 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
 \end{table}
 \begin{table}[H]
     \centering
-    \begin{tabular}{|l|c|c|c|c|c|}
+    \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{Model} & \textbf{l1 ratio} & \textbf{Poids régularisation} & \textbf{F1 Val} &
+        \textbf{F1 Test}\\
+        \hline
+        SGD avec Huber modifié & 0.223 & 0.01 & 0.6294 & N/A\\
+        \hline
+    \end{tabular}
+    \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour SVM}
+    \label{tab:model_comparison}
+\end{table}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|c|c|c|c|}
         \hline
         \textbf{Model} & \textbf{Learning rate} & \textbf{Nombre d'arbres} &
         \textbf{Profondeur maximale} &
         \textbf{subsample} &
-        \textbf{F1} \\
+        \textbf{F1 Val} &
+        \textbf{F1 Test} \\
         \hline
-        XGBoost & 0.0378 & 500 & 10 & 0.7465 & 0.6592\\
+        XGBoost & 0.0378 & 500 & 10 & 0.7465 & 0.6592 & 0.6629\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour XGBoost}
@@ -288,14 +294,15 @@ Une amélioration future à nos résultats serait de faire rouler notre modèle 
 \end{table}
 \begin{table}[H]
     \centering
-    \begin{tabular}{|l|c|c|c|c|}
+    \begin{tabular}{|l|c|c|c|c|c|}
         \hline
         \textbf{Model} & \textbf{Poids régularisation} &
         \textbf{Régularisation} &
         \textbf{Solveur} &
-        \textbf{F1}\\
+        \textbf{F1 Val} & 
+        \textbf{F1 Test}\\
         \hline
-        LogReg & 0.6808 & l1 & liblinear & 0.6308\\
+        LogReg & 0.6808 & l1 & liblinear & 0.6308 & N/A\\
         \hline
     \end{tabular}
     \caption{Comparaison entre prétraitement et valeurs d'hyperparamètres pour régression logistique utilisée dans les modèles ensemblistes}

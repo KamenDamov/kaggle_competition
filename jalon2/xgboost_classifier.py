@@ -9,19 +9,17 @@ from sklearn.preprocessing import FunctionTransformer
 from xgboost import XGBClassifier
 
 def train_xgboost_with_tfidf(X_train, y_train) -> XGBClassifier:
-    # TFIDF génèrent de moins bonnes perfo sur validation
     pipeline = Pipeline([
         ('tfidf', TfidfTransformer()),   
         ('to_float32', FunctionTransformer(lambda X: X.astype(np.float32))),           
         ('xgboost', XGBClassifier())                    
     ])
 
-    # Define parameter grid for both TF-IDF and ComplementNB
     param_distributions = {
-            'model__learning_rate': uniform(0.01, 0.2),         # Learning rate for the model
-            'model__n_estimators': [200, 300, 400, 500],             # Number of boosting rounds
-            'model__max_depth': [3, 5, 7, 10],                 # Maximum depth of each tree
-            'model__subsample': uniform(0.6, 0.4)               # Fraction of samples used for each boosting round
+            'model__learning_rate': uniform(0.01, 0.2),         
+            'model__n_estimators': [200, 300, 400, 500],            
+            'model__max_depth': [3, 5, 7, 10],                 
+            'model__subsample': uniform(0.6, 0.4)             
         }
 
     scorer = make_scorer(f1_score)
@@ -47,10 +45,10 @@ def train_xgboost(X_train, y_train) -> XGBClassifier:
     ])
 
     param_distributions = {
-            'model__learning_rate': uniform(0.01, 0.2),         # Learning rate for the model
-            'model__n_estimators': [200, 300, 400, 500],             # Number of boosting rounds
-            'model__max_depth': [3, 5, 7, 10],                 # Maximum depth of each tree
-            'model__subsample': uniform(0.6, 0.4)               # Fraction of samples used for each boosting round
+            'model__learning_rate': uniform(0.01, 0.2),         
+            'model__n_estimators': [200, 300, 400, 500],        
+            'model__max_depth': [3, 5, 7, 10],                 
+            'model__subsample': uniform(0.6, 0.4)              
         }
 
     scorer = make_scorer(f1_score)

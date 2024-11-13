@@ -10,6 +10,7 @@ cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scorer = make_scorer(f1_score)
 
 def train_logreg(X_train, y_train): 
+    """Entrainer regréssion logistique en lançant une validation croisée aléatoire"""
     pipeline = Pipeline([
             ('model', LogisticRegression(max_iter=1000))
         ])

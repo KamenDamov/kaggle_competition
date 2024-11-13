@@ -11,11 +11,14 @@ from scipy.stats import uniform
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_predict
 
+
+# Définit paramètres de validation croisée
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scorer = make_scorer(f1_score)
 
-def create_pipeline_and_params(model_name):
-    # TFIDF génèrent de moins bonnes perfo sur validation
+
+def create_pipeline_and_params(model_name):    
+    """Définir pipeline et esapce hyperparamétrique"""
     if model_name == 'ComplementNB':
         pipeline = Pipeline([
             ('model', ComplementNB())
@@ -27,10 +30,10 @@ def create_pipeline_and_params(model_name):
             ('model', XGBClassifier(eval_metric='logloss'))
         ])
         param_grid = {
-            'model__learning_rate': uniform(0.01, 0.2),         # Learning rate for the model
-            'model__n_estimators': [200, 300, 400, 500],             # Number of boosting rounds
-            'model__max_depth': [3, 5, 7, 10],                 # Maximum depth of each tree
-            'model__subsample': uniform(0.6, 0.4)               # Fraction of samples used for each boosting round
+            'model__learning_rate': uniform(0.01, 0.2),         
+            'model__n_estimators': [200, 300, 400, 500],        
+            'model__max_depth': [3, 5, 7, 10],                
+            'model__subsample': uniform(0.6, 0.4)
         }
     
     elif model_name == 'LogisticRegression':
@@ -63,6 +66,7 @@ def create_pipeline_and_params(model_name):
     return pipeline, param_grid
 
 def tune_model(pipeline, param_grid, X_train, y_train):
+    """Appliquer validation croisée aléatoire à un modèle spécifique"""
     random_search = RandomizedSearchCV(
         pipeline, param_distributions=param_grid, scoring=scorer, cv=cv,
         n_iter=10, n_jobs=1, random_state=0, verbose=3
@@ -79,7 +83,7 @@ def tune_model(pipeline, param_grid, X_train, y_train):
     return random_search.best_estimator_
 
 def train_ensemble(X_train, y_train, model_names):
-
+    """Point d'entrée pour entraîner un VotingClassifier"""
     tuned_models = []
     
     for model_name in model_names:

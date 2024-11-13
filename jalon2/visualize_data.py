@@ -12,14 +12,12 @@ from preprocess_data import DataPreprocess, random_undersampling
 
 
 def plot_grid_search(cv_results, grid_param_1, grid_param_2, name_param_1, name_param_2):
-    # Get Test Scores Mean and std for each grid search
     scores_mean = cv_results['mean_test_score']
     scores_mean = np.array(scores_mean).reshape(len(grid_param_2),len(grid_param_1))
 
     scores_sd = cv_results['std_test_score']
     scores_sd = np.array(scores_sd).reshape(len(grid_param_2),len(grid_param_1))
 
-    # Plot Grid search scores
     _, ax = plt.subplots(1,1)
 
     # Param1 is the X-axis, Param 2 is represented as a different curve (color line)
@@ -57,13 +55,9 @@ def length_of_docs(dataset_1, dataset_0, dataset, title):
   plt.grid(False)
   plt.legend(["Label 0", "Label 1", "Tous docs"])
   plt.show()
-  # print_stats("label 1", data_1)
-  # print_stats("label 0", data_0)
-  # print_stats("global", data)
 
-# Longueur par mots
 def length_of_words(dataset_1, dataset_0, dataset):
-    # TODO: doit convertir les mots avec vocab_map
+    """Graphique pour la longueur des mots"""
     data_1 = dataset_1
     data_0 = dataset_0
     data = dataset
@@ -77,13 +71,9 @@ def length_of_words(dataset_1, dataset_0, dataset):
     plt.grid(False)
     plt.legend(["Toutes phrases", "Phrases similaires", "Phrases non similaires"])
     plt.show()
-    # print_stats("similaires", data_1)
-    # print_stats("non similaires", data_0)
-    # print_stats("global", data)
 
-# Longueur moyenne des mots par phrase
 def mean_length_of_words(dataset_similaire, dataset_assimilaire, dataset):
-    # TODO: doit convertir les mots avec vocab_map
+    """Longueur moyenne des mots par phrase"""
     data_sim = dataset_similaire.str.split().apply(lambda x : [len(i) for i in x]).map(lambda x: np.mean(x))
     data_assim = dataset_assimilaire.str.split().apply(lambda x : [len(i) for i in x]).map(lambda x: np.mean(x))
     data = dataset.str.split().apply(lambda x : [len(i) for i in x]).map(lambda x: np.mean(x))
@@ -96,13 +86,9 @@ def mean_length_of_words(dataset_similaire, dataset_assimilaire, dataset):
     plt.grid(False)
     plt.legend(["Toutes phrases", "Phrases similaires", "Phrases non similaires"])
     plt.show()
-    # print_stats("similaires", data_sim)
-    # print_stats("non similaires", data_assim)
-    # print_stats("global", data)
 
-# Top 10 mots les plus fréquents
 def most_frequent_words(dataset, vocab_map, title):
-    # TODO: mots les plus frequents par doc
+    """Top 10 mots les plus fréquents"""
     data = dataset.sum(axis=0)
     top_idx = np.argsort(data)[-10:][::-1]
     x, y= [], []
@@ -124,9 +110,6 @@ def distribution_of_words(dataset_1, dataset_0, dataset):
     plt.plot(data_1)
     plt.plot(data_0)
     plt.plot(data)
-    # plt.hist(data_1, bins=10, color="#00FF0040")  # range pour éviter les valeurs aberrantes
-    # plt.hist(data_0, bins=10, color="#FF000040")
-    # plt.hist(data, bins=10, color="#0000FF40")
     plt.yscale('log')
     plt.title("Distribution des mots")
     plt.xlabel("Mots")
@@ -134,10 +117,6 @@ def distribution_of_words(dataset_1, dataset_0, dataset):
     plt.grid(False)
     plt.legend(["Label 0", "Label 1", "Tous docs"])
     plt.show()
-    # print_stats("label 1", data_1)
-    # print_stats("label 0", data_0)
-    # print_stats("global", data)
-
 
 def visualize_2d_svd(dataset_1, dataset_0):
     # Unzip points into x and y coordinates for each label group
@@ -347,34 +326,6 @@ def get_graphs(vocab_map, dataset, labels, transformation):
     most_frequent_words(dataset, vocab_map, "Top 10 most frequent words with " + transformation)
     plot_cumulative_word_distribution(dataset, labels, "Cumulative Word Frequency Distribution with " + transformation)
     plot_full_word_frequency_distribution(dataset, labels, "Overall Word Frequency Distribution with " + transformation)
-
-
-# def main():
-#     data_preprocess = DataPreprocess()
-#     vocab_map = data_preprocess.vocab_map
-#     for dataset, labels in [(data_preprocess.train, data_preprocess.label_train), (data_preprocess.train_tfidf, data_preprocess.label_train)]:
-#         # Créer un dataset pour les labels 1 et les labels 0
-#         dataset_1, dataset_0 = [], []
-#         n = len(dataset) // 2
-#         if labels is None:
-#             dataset_1 = dataset
-#         else:
-#             for i in range(n):
-#                 if int(labels[i]) == 1:
-#                     dataset_1.append(dataset[i])
-#                     dataset_1.append(dataset[i + n])
-#                 else:
-#                     dataset_0.append(dataset[i])
-#                     dataset_0.append(dataset[i + n])
-#         dataset_1, dataset_0 = np.array(dataset_1), np.array(dataset_0)
-#
-#     length_of_docs(dataset_1, dataset_0, dataset)
-#     # length_of_words(dataset_1, dataset_0, dataset)
-#     # mean_length_of_words(dataset_1, dataset_0, dataset)
-#     most_frequent_words(dataset, vocab_map, 'all labels')
-#     most_frequent_words(dataset_1, vocab_map, 'label 1')
-#     most_frequent_words(dataset_0, vocab_map, 'label 0')
-#     distribution_of_words(dataset_1, dataset_0, dataset)
 
 def main():
     print("processing data...")
