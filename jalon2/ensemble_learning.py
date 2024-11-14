@@ -107,9 +107,7 @@ def train_ensemble(X_train, y_train, model_names):
         best_model = tune_model(pipeline, param_grid, X_train, y_train)
         tuned_models.append((model_name.lower(), best_model))
 
-    print("instancing")
     ensemble = VotingClassifier(estimators=tuned_models, voting='soft')
-    print("fitting")
     ensemble.fit(X_train, y_train)
 
 
