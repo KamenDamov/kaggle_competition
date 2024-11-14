@@ -6,14 +6,11 @@ import numpy as np
 from sklearn.naive_bayes import ComplementNB
 from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
-from cuml.svm import SVC
+# from cuml.svm import SVC  # package pour accélérer les temps de calculs en utilisant le GPU
+from sklearn.svm import SVC
 from scipy.stats import uniform
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_predict
-
-import gc
-import torch
-from GPUtil import showUtilization as gpu_usage
 
 
 # Définit paramètres de validation croisée
@@ -68,16 +65,6 @@ def create_pipeline_and_params(model_name):
         raise ValueError(f"Model {model_name} is not defined.")
     
     return pipeline, param_grid
-
-def free_gpu_cache():
-    print("Initial GPU Usage")
-    gpu_usage()
-
-    gc.collect()
-    torch.cuda.empty_cache()
-
-    print("GPU Usage after emptying the cache")
-    gpu_usage()
 
 
 def tune_model(pipeline, param_grid, X_train, y_train):
